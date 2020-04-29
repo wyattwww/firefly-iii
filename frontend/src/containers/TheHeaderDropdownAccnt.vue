@@ -7,12 +7,7 @@
   >
     <template #toggler>
       <CHeaderNavLink>
-        <div class="c-avatar">
-          <img
-            src="img/avatars/6.jpg"
-            class="c-avatar-img "
-          />
-        </div>
+        <CIcon name="cil-user"/>
       </CHeaderNavLink>
     </template>
     <CDropdownHeader tag="div" class="text-center" color="light">
@@ -69,7 +64,7 @@
 export default {
   name: 'TheHeaderDropdownAccnt',
   data () {
-    return { 
+    return {
       itemsCount: 42
     }
   }

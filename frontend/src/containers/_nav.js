@@ -1,30 +1,12 @@
-export default [
+import { i18n } from '../lang'
 
+export default [
     {
-        computed: {
-            navbar() {
-                return {
-                    _name: 'CSidebarNav',
-                    _children: [
-                        {
-                            _name: 'CSidebarNavItem',
-                            name: 'Dashboard',
-                            to: '/dashboard',
-                            icon: 'cil-speedometer'
-                        },
-                        {
-                            _name: 'CSidebarNavTitle',
-                            _children: ['Financial control']
-                        },
-                    ],
-                }
-            },
-        },
         _name: 'CSidebarNav',
         _children: [
             {
                 _name: 'CSidebarNavItem',
-                name: 'Dashboard',
+                name: i18n.t('firefly.dashboard'),
                 to: '/dashboard',
                 icon: 'cil-speedometer'
             },
