@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+6.0.0
+
+- MAIL_DRIVER is now MAIL_MAILER 
+
 ## [5.2.4 (API 1.1.0)] - 2020-04-26
 
 ### Fixed
