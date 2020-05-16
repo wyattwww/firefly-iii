@@ -59,7 +59,7 @@ class AvailableBudgetController extends Controller
         $this->middleware(
             function ($request, $next) {
                 app('view')->share('title', (string) trans('firefly.budgets'));
-                app('view')->share('mainTitleIcon', 'fa-tasks');
+                app('view')->share('mainTitleIcon', 'fa-pie-chart');
                 $this->abRepository  = app(AvailableBudgetRepositoryInterface::class);
                 $this->currencyRepos = app(CurrencyRepositoryInterface::class);
 
@@ -157,6 +157,7 @@ class AvailableBudgetController extends Controller
      */
     public function edit(AvailableBudget $availableBudget, Carbon $start, Carbon $end)
     {
+        $availableBudget->amount = round($availableBudget->amount, $availableBudget->transactionCurrency->decimal_places);
         return view('budgets.available-budgets.edit', compact('availableBudget', 'start', 'end'));
     }
 

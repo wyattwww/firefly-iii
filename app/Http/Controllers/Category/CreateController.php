@@ -57,7 +57,7 @@ class CreateController extends Controller
         $this->middleware(
             function ($request, $next) {
                 app('view')->share('title', (string) trans('firefly.categories'));
-                app('view')->share('mainTitleIcon', 'fa-bar-chart');
+                app('view')->share('mainTitleIcon', 'fa-bookmark');
                 $this->repository = app(CategoryRepositoryInterface::class);
                 $this->attachments = app(AttachmentHelperInterface::class);
 
@@ -102,9 +102,13 @@ class CreateController extends Controller
         app('preferences')->mark();
 
         // store attachment(s):
-        /** @var array $files */
         $files = $request->hasFile('attachments') ? $request->file('attachments') : null;
-        $this->attachments->saveAttachmentsForModel($category, $files);
+        if (null !== $files && !auth()->user()->hasRole('demo')) {
+            $this->attachments->saveAttachmentsForModel($category, $files);
+        }
+        if (null !== $files && auth()->user()->hasRole('demo')) {
+            session()->flash('info',(string)trans('firefly.no_att_demo_user'));
+        }
 
         if (count($this->attachments->getMessages()->get('attachments')) > 0) {
             $request->session()->flash('info', $this->attachments->getMessages()->get('attachments')); // @codeCoverageIgnore
