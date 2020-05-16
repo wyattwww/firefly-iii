@@ -143,13 +143,13 @@ class Handler extends ExceptionHandler
                 'line'         => $exception->getLine(),
                 'code'         => $exception->getCode(),
                 'version'      => config('firefly.version'),
-                'url'          => Request::fullUrl(),
-                'userAgent'    => Request::userAgent(),
-                'json'         => Request::acceptsJson(),
+                'url'          => request()->fullUrl(),
+                'userAgent'    => request()->userAgent(),
+                'json'         => request()->acceptsJson(),
             ];
 
             // create job that will mail.
-            $ipAddress = Request::ip() ?? '0.0.0.0';
+            $ipAddress = request()->ip() ?? '0.0.0.0';
             $job       = new MailError($userData, (string) config('firefly.site_owner'), $ipAddress, $data);
             dispatch($job);
         }
