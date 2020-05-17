@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "\u00dcberblick"
+        "welcome_back": "\u00dcberblick",
+        "dashboard": "\u00dcbersicht",
+        "automation": "Automatisierungen",
+        "accounting": "Buchhaltung",
+        "financial_control": "Finanzkontrolle",
+        "others": "Weitere"
     },
     "config": {
         "html_language": "de"

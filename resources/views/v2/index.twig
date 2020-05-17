@@ -1,12 +1,33 @@
+<!--
+  ~ index.html
+  ~ Copyright (c) 2020 james@firefly-iii.org
+  ~
+  ~ This file is part of Firefly III (https://github.com/firefly-iii).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>
-      Firefly III
-    </title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Firefly III</title>
+
+    <!-- favicons for all devices -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=3e8AboOwbd">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=3e8AboOwbd">
@@ -18,56 +39,15 @@
     <meta name="msapplication-TileColor" content="#3c8dbc">
     <meta name="msapplication-TileImage" content="mstile-144x144.png?v=3e8AboOwbd">
     <meta name="theme-color" content="#3c8dbc">
-    <link nonce="{{ JS_NONCE }}" href="v2/css/chunk-0b493516.css" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/css/chunk-35afbb66.css" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/css/chunk-7a0cb226.css" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/css/chunk-b88b05a4.css" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/css/chunk-f319ab08.css" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-0321a722.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-0a6323ae.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-0b493516.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-28d6db65.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0a400c.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0a443e.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0aa9f0.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0aab88.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0ab2eb.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0ae5e6.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0ae943.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0b1bf6.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0b59e9.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0c4303.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0c8ff5.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0d3e27.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0de2d9.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0de6aa.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0e8c24.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0f06bd.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d0f0c1b.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d208124.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d2131a8.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d21444c.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d216de3.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d2183eb.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d21eae7.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d222779.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d226319.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d22885b.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d22c303.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d22d610.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d23777b.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-2d237b34.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-35afbb66.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-38e6ca0c.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-7a0cb226.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-b88b05a4.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/js/chunk-f319ab08.js" rel="prefetch">
-    <link nonce="{{ JS_NONCE }}" href="v2/css/app.css" rel="stylesheet" integrity="sha384-5hqkSLF2Ad8kpiv0bioZ0BFFCCeCgMjrwMsBJeC+ocrQ2CWI0aeskLxeMnsIJbSd">
-  </head>
-  <body>
-    <noscript><strong>We're sorry but this app doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript>
-    <div id="app"></div>
-    <script nonce="{{ JS_NONCE }}" src="v2/js/chunk-vendors.js" integrity="sha384-mPy/4bxPNeCLnvpKW49bvg+d08CBXV2lsZiO8ZbaoKg6CXFpq2tqZJS/wrIcUJod"></script>
-    <script nonce="{{ JS_NONCE }}" src="v2/js/app.js" integrity="sha384-wNZ7RSZKo2eX0A3bJ2peE3+X4FsNQNf0Aa4oDCxSkgs1WbcspJQjNF+UZVs2Q4C7"></script>
-  </body>
+<link href="v2/js/0.js" rel="prefetch"><link href="v2/js/1.js" rel="prefetch"><link href="v2/js/10.js" rel="prefetch"><link href="v2/js/11.js" rel="prefetch"><link href="v2/js/12.js" rel="prefetch"><link href="v2/js/13.js" rel="prefetch"><link href="v2/js/14.js" rel="prefetch"><link href="v2/js/15.js" rel="prefetch"><link href="v2/js/16.js" rel="prefetch"><link href="v2/js/17.js" rel="prefetch"><link href="v2/js/18.js" rel="prefetch"><link href="v2/js/19.js" rel="prefetch"><link href="v2/js/2.js" rel="prefetch"><link href="v2/js/20.js" rel="prefetch"><link href="v2/js/21.js" rel="prefetch"><link href="v2/js/22.js" rel="prefetch"><link href="v2/js/23.js" rel="prefetch"><link href="v2/js/24.js" rel="prefetch"><link href="v2/js/25.js" rel="prefetch"><link href="v2/js/26.js" rel="prefetch"><link href="v2/js/27.js" rel="prefetch"><link href="v2/js/28.js" rel="prefetch"><link href="v2/js/29.js" rel="prefetch"><link href="v2/js/3.js" rel="prefetch"><link href="v2/js/30.js" rel="prefetch"><link href="v2/js/31.js" rel="prefetch"><link href="v2/js/32.js" rel="prefetch"><link href="v2/js/33.js" rel="prefetch"><link href="v2/js/34.js" rel="prefetch"><link href="v2/js/35.js" rel="prefetch"><link href="v2/js/36.js" rel="prefetch"><link href="v2/js/37.js" rel="prefetch"><link href="v2/js/38.js" rel="prefetch"><link href="v2/js/39.js" rel="prefetch"><link href="v2/js/4.js" rel="prefetch"><link href="v2/js/5.js" rel="prefetch"><link href="v2/js/6.js" rel="prefetch"><link href="v2/js/7.js" rel="prefetch"><link href="v2/js/8.js" rel="prefetch"><link href="v2/js/9.js" rel="prefetch"></head>
+
+<body>
+<noscript>
+    <strong>We're sorry but this app doesn't work properly without JavaScript enabled. Please enable it to
+        continue.</strong>
+</noscript>
+<div id="app"></div>
+<!-- built files will be auto injected -->
+<script type="text/javascript" src="v2/js/chunk-vendors.js" integrity="sha384-aNhR5cvVKZZfRY8fYxltsFE5jhUvjLh/lIL/h25nQg4uOwSsK0fJtxUqYsm+W3sg"></script><script type="text/javascript" src="v2/js/app.js" integrity="sha384-XWHv6HAy3Y3EnWLuipiqXJj6I5Urbfy1ePSStszz12Orh4cjqpCZaRf0ydWiRA8i"></script></body>
+
 </html>

@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "\u0427\u0442\u043e \u043f\u0440\u043e\u0438\u0441\u0445\u043e\u0434\u0438\u0442 \u0441 \u043c\u043e\u0438\u043c\u0438 \u0444\u0438\u043d\u0430\u043d\u0441\u0430\u043c\u0438?"
+        "welcome_back": "\u0427\u0442\u043e \u043f\u0440\u043e\u0438\u0441\u0445\u043e\u0434\u0438\u0442 \u0441 \u043c\u043e\u0438\u043c\u0438 \u0444\u0438\u043d\u0430\u043d\u0441\u0430\u043c\u0438?",
+        "dashboard": "\u0421\u0432\u043e\u0434\u043a\u0430",
+        "automation": "Automation",
+        "accounting": "Accounting",
+        "financial_control": "Financial control",
+        "others": "Others"
     },
     "config": {
         "html_language": "ru"

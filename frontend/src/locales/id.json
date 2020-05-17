@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "What's playing?"
+        "welcome_back": "What's playing?",
+        "dashboard": "Dasbor",
+        "automation": "Automation",
+        "accounting": "Accounting",
+        "financial_control": "Financial control",
+        "others": "Others"
     },
     "config": {
         "html_language": "id"

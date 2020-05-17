@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "Mit\u00e4 kuuluu?"
+        "welcome_back": "Mit\u00e4 kuuluu?",
+        "dashboard": "Etusivu",
+        "automation": "Automaatio",
+        "accounting": "Kirjanpito",
+        "financial_control": "Talouden hallinta",
+        "others": "Muut"
     },
     "config": {
         "html_language": "fi"

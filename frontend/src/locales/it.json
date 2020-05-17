@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "La tua situazione finanziaria"
+        "welcome_back": "La tua situazione finanziaria",
+        "dashboard": "Cruscotto",
+        "automation": "Automazione",
+        "accounting": "Contabilit\u00e0",
+        "financial_control": "Controllo finanziario",
+        "others": "Altro"
     },
     "config": {
         "html_language": "it"

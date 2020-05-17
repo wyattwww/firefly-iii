@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "O que est\u00e1 acontecendo?"
+        "welcome_back": "O que est\u00e1 acontecendo?",
+        "dashboard": "Painel de Controle",
+        "automation": "Automa\u00e7\u00e3o",
+        "accounting": "Contabilidade",
+        "financial_control": "Controle financeiro",
+        "others": "Outros"
     },
     "config": {
         "html_language": "pt-br"

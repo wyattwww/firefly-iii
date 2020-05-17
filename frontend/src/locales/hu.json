@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "Mi a helyzet?"
+        "welcome_back": "Mi a helyzet?",
+        "dashboard": "M\u0171szerfal",
+        "automation": "Automatiz\u00e1l\u00e1s",
+        "accounting": "Sz\u00e1ml\u00e1z\u00e1s",
+        "financial_control": "P\u00e9nz\u00fcgyi fel\u00fcgyelet",
+        "others": "Egyebek"
     },
     "config": {
         "html_language": "hu"

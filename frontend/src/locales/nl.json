@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "Hoe staat het er voor?"
+        "welcome_back": "Hoe staat het er voor?",
+        "dashboard": "Dashboard",
+        "automation": "Automatisering",
+        "accounting": "Boekhouden",
+        "financial_control": "Financieel overzicht",
+        "others": "Overige"
     },
     "config": {
         "html_language": "nl"

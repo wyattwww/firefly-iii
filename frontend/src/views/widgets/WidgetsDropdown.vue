@@ -1,7 +1,7 @@
 <template>
   <CRow>
     <CCol sm="6" lg="3">
-      <CWidgetDropdown color="primary" header="9.823" text="Members online">
+      <CWidgetDropdown color="primary" header="€ 12,34" text="Balance">
         <template #default>
           <CDropdown
             color="transparent p-0"
@@ -10,10 +10,7 @@
             <template #toggler-content>
               <CIcon name="cil-settings"/>
             </template>
-            <CDropdownItem>Action</CDropdownItem>
-            <CDropdownItem>Another action</CDropdownItem>
-            <CDropdownItem>Something else here...</CDropdownItem>
-            <CDropdownItem disabled>Disabled action</CDropdownItem>
+            <CDropdownItem>Spent over all accounts</CDropdownItem>
           </CDropdown>
         </template>
         <template #footer>
@@ -21,16 +18,16 @@
             pointed
             class="mt-3 mx-3"
             style="height:70px"
-            :data-points="[65, 59, 84, 84, 51, 55, 40]"
+            :data-points="[65, 59, 84, 84, 51, 55, 40,65, 59, 84, 84, 51, 55, 40]"
             point-hover-background-color="primary"
             label="Members"
-            labels="months"
+            :labels="['1','2', '3','4','5','6','7','8','9','10','11','12','13','14','15']"
           />
         </template>
       </CWidgetDropdown>
     </CCol>
     <CCol sm="6" lg="3">
-      <CWidgetDropdown color="info" header="9.823" :text="$t('firefly.welcome_back')">
+      <CWidgetDropdown color="info" header="9.823" text="Bills to pay">
         <template #default>
           <CDropdown
             color="transparent p-0"
@@ -64,7 +61,7 @@
       <CWidgetDropdown
         color="warning"
         header="9.823"
-        :text="$t('firefly.welcome_back')"
+        text="Budgets and spending"
       >
         <template #default>
           <CDropdown
@@ -98,7 +95,7 @@
       <CWidgetDropdown
         color="danger"
         header="9.823"
-        :text="$t('firefly.welcome_back')"
+        text="Capital"
       >
         <template #default>
           <CDropdown

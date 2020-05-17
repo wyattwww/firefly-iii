@@ -10,9 +10,10 @@ export default [
                 to: '/dashboard',
                 icon: 'cil-speedometer'
             },
+            // subheader
             {
                 _name: 'CSidebarNavTitle',
-                _children: ['Financial control']
+                _children: [i18n.t('firefly.financial_control')]
             },
             // top 3 things
             {
@@ -24,7 +25,7 @@ export default [
             {
                 _name: 'CSidebarNavItem',
                 name: 'Bills',
-                to: '/charts',
+                to: '/theme/colors',
                 icon: 'cil-chart-pie'
             },
             {
@@ -32,6 +33,11 @@ export default [
                 name: 'Piggy banks',
                 to: '/charts',
                 icon: 'cil-chart-pie'
+            },
+            // subheader
+            {
+                _name: 'CSidebarNavTitle',
+                _children: [i18n.t('firefly.accounting')]
             },
             // menu for transactions
             {
@@ -54,51 +60,6 @@ export default [
                     },
                 ]
             },
-
-            // menu for accounts
-            {
-                _name: 'CSidebarNavDropdown',
-                name: 'Accounts',
-                route: '/base',
-                icon: 'cil-puzzle',
-                items: [
-                    {
-                        name: 'Asset accounts',
-                        to: '/base/breadcrumbs'
-                    },
-                    {
-                        name: 'Expense accounts',
-                        to: '/base/cards'
-                    },
-                    {
-                        name: 'Revenue accounts',
-                        to: '/base/cards'
-                    },
-                    {
-                        name: 'Liabilities',
-                        to: '/base/cards'
-                    },
-                ]
-            },
-
-            // classification
-            {
-                _name: 'CSidebarNavDropdown',
-                name: 'Classification',
-                route: '/base',
-                icon: 'cil-puzzle',
-                items: [
-                    {
-                        name: 'Categories',
-                        to: '/base/breadcrumbs'
-                    },
-                    {
-                        name: 'Tags',
-                        to: '/base/cards'
-                    },
-                ]
-            },
-
             // menu for automation
             {
                 _name: 'CSidebarNavDropdown',
@@ -116,7 +77,53 @@ export default [
                     },
                 ]
             },
-
+            // subheader
+            {
+                _name: 'CSidebarNavTitle',
+                _children: [i18n.t('firefly.others')]
+            },
+            // menu for accounts
+            {
+                _name: 'CSidebarNavDropdown',
+                name: 'Accounts',
+                route: '/base',
+                icon: 'cil-puzzle',
+                items: [
+                    {
+                        name: 'Asset accounts',
+                        to: '/base/tables'
+                    },
+                    {
+                        name: 'Expense accounts',
+                        to: '/base/cards'
+                    },
+                    {
+                        name: 'Revenue accounts',
+                        to: '/base/cards'
+                    },
+                    {
+                        name: 'Liabilities',
+                        to: '/base/cards'
+                    },
+                ]
+            },
+            // classification
+            {
+                _name: 'CSidebarNavDropdown',
+                name: 'Classification',
+                route: '/base',
+                icon: 'cil-puzzle',
+                items: [
+                    {
+                        name: 'Categories',
+                        to: '/base/breadcrumbs'
+                    },
+                    {
+                        name: 'Tags',
+                        to: '/base/cards'
+                    },
+                ]
+            },
 
             // menu for tools
             {

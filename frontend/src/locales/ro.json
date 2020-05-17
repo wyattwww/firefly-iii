@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "Ce se red\u0103?"
+        "welcome_back": "Ce se red\u0103?",
+        "dashboard": "Panou de control",
+        "automation": "Automation",
+        "accounting": "Accounting",
+        "financial_control": "Financial control",
+        "others": "Others"
     },
     "config": {
         "html_language": "ro"

@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "Jak to jde?"
+        "welcome_back": "Jak to jde?",
+        "dashboard": "P\u0159ehled",
+        "automation": "Automation",
+        "accounting": "Accounting",
+        "financial_control": "Financial control",
+        "others": "Others"
     },
     "config": {
         "html_language": "cs"

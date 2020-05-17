@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "\u4eca\u5929\u7406\u8d22\u4e86\u5417\uff1f"
+        "welcome_back": "\u4eca\u5929\u7406\u8d22\u4e86\u5417\uff1f",
+        "dashboard": "\u76d1\u63a7\u9762\u677f",
+        "automation": "Automation",
+        "accounting": "Accounting",
+        "financial_control": "Financial control",
+        "others": "Others"
     },
     "config": {
         "html_language": "zh-cn"

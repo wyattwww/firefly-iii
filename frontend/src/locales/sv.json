@@ -1,6 +1,11 @@
 {
     "firefly": {
-        "welcome_back": "Vad spelas?"
+        "welcome_back": "Vad spelas?",
+        "dashboard": "Kontrollpanel",
+        "automation": "Automation",
+        "accounting": "Accounting",
+        "financial_control": "Financial control",
+        "others": "Others"
     },
     "config": {
         "html_language": "sv"
