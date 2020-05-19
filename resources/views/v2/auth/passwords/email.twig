@@ -1,0 +1,66 @@
+{% extends "./layout/auth-base" %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <!-- do error handling -->
+                {% if errors.has('email') %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                {% if errors.has('email') %}
+                                    <strong>{{ 'flash_error'|_ }}</strong> {{ errors.get('email')[0] }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- do success handling -->
+                {% if session('status') %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-success">
+                                {{ session('status') }}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="card-group">
+                    <div class="card p-4">
+                        <div class="card-body">
+                            <h1>Firefly III</h1>
+                            <p class="text-muted">
+                                {{ 'reset_password'|_ }}
+                            </p>
+
+                            <form role="form" method="POST" action="{{ URL.to('/password/email') }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                          <i class="cil-user"></i>
+                      </span>
+                                    </div>
+                                    <input class="form-control" type="text" placeholder="{{ trans('form.email') }}" name="email" value="{{ email }}"
+                                               required autofocus>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="hidden" name="remember" value="1"/>
+                                        <button class="btn btn-primary px-4" type="submit">{{ 'reset_button'|_ }}</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
