@@ -121,19 +121,22 @@ abstract class SpectreRequest
         $this->user       = $user;
         $this->server     = 'https://' . config('import.options.spectre.server');
         $this->expiresAt  = time() + 180;
-        $privateKey       = app('preferences')->getForUser($user, 'spectre_private_key', null);
-        $this->privateKey = $privateKey->data;
+        //$privateKey       = app('preferences')->getForUser($user, 'spectre_private_key', null);
+        $privateKey = envNonEmpty('SPECTRE_PRIVATE_KEY', null);
+        $this->privateKey = $privateKey;
 
         // set client ID
-        $appId = app('preferences')->getForUser($user, 'spectre_app_id', null);
-        if (null !== $appId && '' !== (string)$appId->data) {
-            $this->appId = $appId->data;
+        //$appId = app('preferences')->getForUser($user, 'spectre_app_id', null);
+        $appId = envNonEmpty('SPECTRE_APP_ID', null);
+        if (null !== $appId && '' !== (string)$appId) {
+            $this->appId = $appId;
         }
 
         // set service secret
-        $secret = app('preferences')->getForUser($user, 'spectre_secret', null);
-        if (null !== $secret && '' !== (string)$secret->data) {
-            $this->secret = $secret->data;
+        //$secret = app('preferences')->getForUser($user, 'spectre_secret', null);
+        $secret = envNonEmpty('SPECTRE_SECRET', null);
+        if (null !== $secret && '' !== (string)$secret) {
+            $this->secret = $secret;
         }
     }
 
@@ -158,6 +161,8 @@ abstract class SpectreRequest
         $toSign = $this->expiresAt . '|' . strtoupper($method) . '|' . $uri . '|' . $data . ''; // no file so no content there.
         Log::debug(sprintf('String to sign: "%s"', $toSign));
         $signature = '';
+
+        Log::debug('Private key: ' . $this->privateKey);
 
         // Sign the data
         openssl_sign($toSign, $signature, $this->privateKey, OPENSSL_ALGO_SHA256);

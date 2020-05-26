@@ -66,11 +66,13 @@ class SpectrePrerequisites implements PrerequisitesInterface
     public function getViewParameters(): array
     {
         /** @var Preference $appIdPreference */
-        $appIdPreference = app('preferences')->getForUser($this->user, 'spectre_app_id', null);
-        $appId           = null === $appIdPreference ? '' : $appIdPreference->data;
+        //$appIdPreference = app('preferences')->getForUser($this->user, 'spectre_app_id', null);
+        $appIdPreference = envNonEmpty('SPECTRE_APP_ID', null);
+        $appId           = null === $appIdPreference ? '' : $appIdPreference;
         /** @var Preference $secretPreference */
-        $secretPreference = app('preferences')->getForUser($this->user, 'spectre_secret', null);
-        $secret           = null === $secretPreference ? '' : $secretPreference->data;
+        //$secretPreference = app('preferences')->getForUser($this->user, 'spectre_secret', null);
+        $secretPreference = envNonEmpty('SPECTRE_SECRET', null);
+        $secret           = null === $secretPreference ? '' : $secretPreference;
         $publicKey        = $this->getPublicKey();
 
         return [
@@ -112,8 +114,8 @@ class SpectrePrerequisites implements PrerequisitesInterface
     public function storePrerequisites(array $data): MessageBag
     {
         Log::debug('Storing Spectre API keys..');
-        app('preferences')->setForUser($this->user, 'spectre_app_id', $data['app_id'] ?? null);
-        app('preferences')->setForUser($this->user, 'spectre_secret', $data['secret'] ?? null);
+        //app('preferences')->setForUser($this->user, 'spectre_app_id', $data['app_id'] ?? null);
+        //app('preferences')->setForUser($this->user, 'spectre_secret', $data['secret'] ?? null);
         Log::debug('Done!');
 
         return new MessageBag;
@@ -142,8 +144,8 @@ class SpectrePrerequisites implements PrerequisitesInterface
         // Extract the public key from $res to $pubKey
         $pubKey = openssl_pkey_get_details($res);
 
-        app('preferences')->setForUser($this->user, 'spectre_private_key', $privKey);
-        app('preferences')->setForUser($this->user, 'spectre_public_key', $pubKey['key']);
+        //app('preferences')->setForUser($this->user, 'spectre_private_key', $privKey);
+        //app('preferences')->setForUser($this->user, 'spectre_public_key', $pubKey['key']);
         Log::debug('Created key pair');
 
     }
@@ -156,16 +158,18 @@ class SpectrePrerequisites implements PrerequisitesInterface
     private function getPublicKey(): string
     {
         Log::debug('get public key');
-        $preference = app('preferences')->getForUser($this->user, 'spectre_public_key', null);
+        //$preference = app('preferences')->getForUser($this->user, 'spectre_public_key', null);
+        $preference = envNonEmpty('SPECTRE_PUBLIC_KEY', null);
         if (null === $preference) {
             Log::debug('public key is null');
             // create key pair
             $this->createKeyPair();
         }
-        $preference = app('preferences')->getForUser($this->user, 'spectre_public_key', null);
+        //$preference = app('preferences')->getForUser($this->user, 'spectre_public_key', null);
+        $preference = envNonEmpty('SPECTRE_PUBLIC_KEY', null);
         Log::debug('Return public key for user');
 
-        return $preference->data;
+        return $preference;
     }
 
     /**
@@ -175,11 +179,12 @@ class SpectrePrerequisites implements PrerequisitesInterface
      */
     private function hasAppId(): bool
     {
-        $appId = app('preferences')->getForUser($this->user, 'spectre_app_id', null);
+        //$appId = app('preferences')->getForUser($this->user, 'spectre_app_id', null);
+        $appId = envNonEmpty('SPECTRE_APP_ID', null);
         if (null === $appId) {
             return false;
         }
-        if ('' === (string) $appId->data) {
+        if ('' === (string) $appId) {
             return false;
         }
 
@@ -194,10 +199,11 @@ class SpectrePrerequisites implements PrerequisitesInterface
     private function hasSecret(): bool
     {
         $secret = app('preferences')->getForUser($this->user, 'spectre_secret', null);
+        $secret = envNonEmpty('SPECTRE_SECRET', null);
         if (null === $secret) {
             return false;
         }
-        if ('' === (string) $secret->data) {
+        if ('' === (string) $secret) {
             return false;
         }
 

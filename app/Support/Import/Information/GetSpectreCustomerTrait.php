@@ -93,9 +93,10 @@ trait GetSpectreCustomerTrait
         Log::debug(sprintf('Found %d customer(s)', count($customers)));
         /** @var Customer $current */
         foreach ($customers as $current) {
-            if ('default_ff3_customer' === $current->getIdentifier()) {
+            //if ('default_ff3_customer' === $current->getIdentifier()) {
+            if (auth()->user()->email === $current->getIdentifier()) {
                 $customer = $current;
-                Log::debug('Found the correct customer.');
+                Log::debug(sprintf('Found customer with name "%s"', $current->getIdentifier()));
                 break;
             }
             Log::debug(sprintf('Skip customer with name "%s"', $current->getIdentifier()));
