@@ -23,7 +23,10 @@ declare(strict_types=1);
 namespace FireflyIII\Support;
 
 use Carbon\Carbon;
+use Exception;
 use FireflyIII\Models\Telemetry as TelemetryModel;
+use FireflyIII\Support\System\GeneratesInstallationId;
+use Illuminate\Database\QueryException;
 use JsonException;
 use Log;
 
@@ -32,6 +35,7 @@ use Log;
  */
 class Telemetry
 {
+    use GeneratesInstallationId;
     /**
      * Feature telemetry stores a $value for the given $feature.
      * Will only store the given $feature / $value combination once.
@@ -124,12 +128,17 @@ class Telemetry
             Log::error(sprintf('JSON Exception encoding the following value: %s: %s', $value, $e->getMessage()));
             $jsonEncoded = [];
         }
+        try {
+            $count = TelemetryModel
+                ::where('type', $type)
+                ->where('key', $key)
+                ->where('value', $jsonEncoded)
+                ->count();
+        } catch (QueryException|Exception $e) {
+            $count = 0;
+        }
 
-        return TelemetryModel
-                   ::where('type', $type)
-                   ->where('key', $key)
-                   ->where('value', $jsonEncoded)
-                   ->count() > 0;
+        return $count > 0;
     }
 
     /**
@@ -166,14 +175,20 @@ class Telemetry
      */
     private function storeEntry(string $type, string $name, string $value): void
     {
-        TelemetryModel::create(
-            [
-                'installation_id' => \FireflyConfig::get('installation_id', '')->data,
-                'key'             => $name,
-                'type'            => $type,
-                'value'           => $value,
-            ]
-        );
+        $this->generateInstallationId();
+        $config         = app('fireflyconfig')->get('installation_id', null);
+        $installationId = null !== $config ? $config->data : 'empty';
+        try {
+            TelemetryModel::create(
+                [
+                    'installation_id' => $installationId,
+                    'key'             => $name,
+                    'type'            => $type,
+                    'value'           => $value,
+                ]
+            );
+        } catch (QueryException|Exception $e) {
+            // ignore.
+        }
     }
-
 }
