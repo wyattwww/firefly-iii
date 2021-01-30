@@ -30,7 +30,7 @@ $password    = '';
 $database    = '';
 $port        = '';
 
-if (!(false === $databaseUrl)) {
+if (false !== $databaseUrl) {
     $options  = parse_url($databaseUrl);
     $host     = $options['host'] ?? 'firefly_iii_db';
     $username = $options['user'] ?? 'firefly';
@@ -50,7 +50,8 @@ $mysql_ssl_ciphers = envNonEmpty('MYSQL_SSL_CIPHER', null);
 $mysql_ssl_verify  = envNonEmpty('MYSQL_SSL_VERIFY_SERVER_CERT', null);
 
 $mySqlSSLOptions = [];
-if (false !== envNonEmpty('MYSQL_USE_SSL', false)) {
+$useSSL = envNonEmpty('MYSQL_USE_SSL', false);
+if (false !== $useSSL && null !== $useSSL) {
     if (null !== $mysql_ssl_ca_dir) {
         $mySqlSSLOptions[PDO::MYSQL_ATTR_SSL_CAPATH] = $mysql_ssl_ca_dir;
     }
@@ -72,11 +73,16 @@ if (false !== envNonEmpty('MYSQL_USE_SSL', false)) {
 }
 
 return [
-    'default'     => envNonEmpty('DB_CONNECTION', 'pgsql'),
+    'default'     => envNonEmpty('DB_CONNECTION', 'mysql'),
     'connections' => [
         'sqlite' => [
             'driver'   => 'sqlite',
             'database' => envNonEmpty('DB_DATABASE', storage_path('database/database.sqlite')),
+            'prefix'   => '',
+        ],
+        'sqlite_test' => [
+            'driver'   => 'sqlite',
+            'database' => envNonEmpty('DB_DATABASE', storage_path('database/test_db.sqlite')),
             'prefix'   => '',
         ],
         'mysql'  => [
@@ -139,17 +145,21 @@ return [
             'prefix'  => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
         'default' => [
-            'url'      => env('REDIS_URL'),
-            'host'     => env('REDIS_HOST', '127.0.0.1'),
+            'scheme'   => envNonEmpty('REDIS_SCHEME', 'tcp'),
+            'url'      => envNonEmpty('REDIS_URL'),
+            'path'     => envNonEmpty('REDIS_PATH'),
+            'host'     => envNonEmpty('REDIS_HOST', '127.0.0.1'),
+            'port'     => envNonEmpty('REDIS_PORT', 6379),
             'password' => env('REDIS_PASSWORD', null),
-            'port'     => env('REDIS_PORT', 6379),
             'database' => env('REDIS_DB', '0'),
         ],
         'cache'   => [
-            'url'      => env('REDIS_URL'),
-            'host'     => env('REDIS_HOST', '127.0.0.1'),
+            'scheme'   => envNonEmpty('REDIS_SCHEME', 'tcp'),
+            'url'      => envNonEmpty('REDIS_URL'),
+            'path'     => envNonEmpty('REDIS_PATH'),
+            'host'     => envNonEmpty('REDIS_HOST', '127.0.0.1'),
+            'port'     => envNonEmpty('REDIS_PORT', 6379),
             'password' => env('REDIS_PASSWORD', null),
-            'port'     => env('REDIS_PORT', 6379),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
     ],

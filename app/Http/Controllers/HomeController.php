@@ -63,8 +63,8 @@ class HomeController extends Controller
      *
      * @param Request $request
      *
-     * @throws Exception
      * @return JsonResponse
+     * @throws Exception
      */
     public function dateRange(Request $request): JsonResponse
     {
@@ -105,8 +105,8 @@ class HomeController extends Controller
      *
      * @param AccountRepositoryInterface $repository
      *
-     * @throws Exception
      * @return Factory|RedirectResponse|Redirector|View
+     * @throws Exception
      */
     public function index(AccountRepositoryInterface $repository)
     {
@@ -119,29 +119,29 @@ class HomeController extends Controller
         }
         $subTitle     = (string) trans('firefly.welcome_back');
         $transactions = [];
-        $frontPage    = app('preferences')->get(
-            'frontPageAccounts',
-            $repository->getAccountsByType([AccountType::DEFAULT, AccountType::ASSET])->pluck('id')->toArray()
-        );
+        $frontPage    = app('preferences')->getFresh('frontPageAccounts', $repository->getAccountsByType([AccountType::ASSET])->pluck('id')->toArray());
         /** @var Carbon $start */
         $start = session('start', Carbon::now()->startOfMonth());
         /** @var Carbon $end */
         $end = session('end', Carbon::now()->endOfMonth());
         /** @noinspection NullPointerExceptionInspection */
         $accounts = $repository->getAccountsById($frontPage->data);
-        $today    = new Carbon;
+        $today    = today(config('app.timezone'));
+
+        Log::debug('Frontpage accounts are ', $frontPage->data);
 
         /** @var BillRepositoryInterface $billRepository */
         $billRepository = app(BillRepositoryInterface::class);
         $billCount      = $billRepository->getBills()->count();
+
+
+        // collect groups for each transaction.
         foreach ($accounts as $account) {
             /** @var GroupCollectorInterface $collector */
             $collector = app(GroupCollectorInterface::class);
-            $collector->setAccounts(new Collection([$account]))
-                      ->withAccountInformation()
-                      ->setRange($start, $end)->setLimit(10)->setPage(1);
-            $set            = $collector->getGroups();
-            $transactions[] = [$set, $account];
+            $collector->setAccounts(new Collection([$account]))->withAccountInformation()->setRange($start, $end)->setLimit(10)->setPage(1);
+            $set            = $collector->getExtractedJournals();
+            $transactions[] = ['transactions' => $set, 'account' => $account];
         }
 
         /** @var User $user */

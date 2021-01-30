@@ -32,26 +32,11 @@ return [
     'index_sidebar-toggle'                            => 'Pour créer de nouvelles opérations, comptes ou autres choses, utilisez le menu sous cette icône.',
     'index_cash_account'                              => 'Voici les comptes créés jusqu\'ici. Vous pouvez utiliser le compte de trésorerie pour faire le suivi de vos dépenses en espèces, mais ce n\'est pas obligatoire, bien sûr.',
 
-    // transactions (withdrawal)
-    'transactions_create_withdrawal_source'           => 'Choisissez votre compte d\'actif ou passif préféré à partir de ce menu déroulant.',
-    'transactions_create_withdrawal_destination'      => 'Sélectionnez un compte de dépenses ici. Laissez-le vide si vous voulez faire une dépense en espèces.',
-    'transactions_create_withdrawal_foreign_currency' => 'Utilisez ce champ pour définir une devise étrangère et un montant.',
-    'transactions_create_withdrawal_more_meta'        => 'Beaucoup d\'autres métadonnées que vous avez définies dans ces champs.',
-    'transactions_create_withdrawal_split_add'        => 'Si vous voulez ventiler une opération ajoutez des parties avec ce bouton',
-
-    // transactions (deposit)
-    'transactions_create_deposit_source'              => 'Sélectionnez ou tapez le bénéficiaire dans ce champ. Laissez le champ vide si vous voulez effectuer un dépôt d\'espèces.',
-    'transactions_create_deposit_destination'         => 'Sélectionnez un compte d\'actif ou de passif ici.',
-    'transactions_create_deposit_foreign_currency'    => 'Utilisez ce champ pour définir une devise étrangère et un montant.',
-    'transactions_create_deposit_more_meta'           => 'Beaucoup d\'autres métadonnées que vous avez définies dans ces champs.',
-    'transactions_create_deposit_split_add'           => 'Si vous voulez ventiler une opération, fractionnez-la avec ce bouton',
-
-    // transactions (transfer)
-    'transactions_create_transfer_source'             => 'Sélectionner le compte d\'actif source ici.',
-    'transactions_create_transfer_destination'        => 'Sélectionner le compte d\'actif de destination ici.',
-    'transactions_create_transfer_foreign_currency'   => 'Utilisez ce champ pour définir une devise étrangère et un montant.',
-    'transactions_create_transfer_more_meta'          => 'Beaucoup d\'autres métadonnées que vous avez définies dans ces champs.',
-    'transactions_create_transfer_split_add'          => 'Si vous voulez ventiler une opération, fractionnez-la avec ce bouton',
+    // transactions
+    'transactions_create_basic_info'                  => 'Saisissez les informations de base de votre opération. Source, destination, date et description.',
+    'transactions_create_amount_info'                 => 'Saisissez le montant de l\'opération. Si nécessaire, les champs seront automatiquement mis à jour pour les informations sur la devise étrangère.',
+    'transactions_create_optional_info'               => 'Tous ces champs sont facultatifs. L\'ajout de méta-données ici rendra vos opérations mieux organisées.',
+    'transactions_create_split'                       => 'Si vous voulez ventiler une opération, fractionnez-la avec ce bouton',
 
     // create account:
     'accounts_create_iban'                            => 'Donnez à vos comptes un IBAN valide. Cela pourrait rendre une importation de données très facile à l\'avenir.',
@@ -95,8 +80,8 @@ return [
     // create transaction
     'transactions_create_switch_box'                          => 'Utilisez ces boutons pour changer rapidement le type d\'opération que vous souhaitez enregistrer.',
     'transactions_create_ffInput_category'                    => 'Vous pouvez saisir librement ce champ. Les catégories créées précédemment seront suggérées.',
-    'transactions_create_withdrawal_ffInput_budget'           => 'Reliez votre retrait à un budget pour un meilleur contrôle financier.',
-    'transactions_create_withdrawal_currency_dropdown_amount' => 'Utilisez ce menu déroulant lorsque votre retrait est dans une autre devise.',
+    'transactions_create_withdrawal_ffInput_budget'           => 'Reliez votre dépense à un budget pour un meilleur contrôle financier.',
+    'transactions_create_withdrawal_currency_dropdown_amount' => 'Utilisez ce menu déroulant lorsque votre dépense est dans une autre devise.',
     'transactions_create_deposit_currency_dropdown_amount'    => 'Utilisez ce menu déroulant lorsque votre dépôt est dans une autre devise.',
     'transactions_create_transfer_ffInput_piggy_bank_id'      => 'Sélectionnez une tirelire et reliez ce transfert à vos économies.',
 

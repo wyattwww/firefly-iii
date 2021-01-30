@@ -43,19 +43,8 @@ use Storage;
 class PiggyBankRepository implements PiggyBankRepositoryInterface
 {
     use ModifiesPiggyBanks;
-    /** @var User */
-    private $user;
 
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
-
+    private User $user;
 
     /**
      * Find by name or return NULL.
@@ -66,7 +55,7 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
      */
     public function findByName(string $name): ?PiggyBank
     {
-        return $this->user->piggyBanks()->where('name', $name)->first(['piggy_banks.*']);
+        return $this->user->piggyBanks()->where('piggy_banks.name', $name)->first(['piggy_banks.*']);
     }
 
     /**
@@ -157,6 +146,7 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
         Log::debug(sprintf('Now in getExactAmount(%d, %d, %d)', $piggyBank->id, $repetition->id, $journal->id));
 
         $operator = null;
+        $currency = null;
         /** @var JournalRepositoryInterface $journalRepost */
         $journalRepost = app(JournalRepositoryInterface::class);
         $journalRepost->setUser($this->user);
@@ -165,15 +155,15 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
         $accountRepos = app(AccountRepositoryInterface::class);
         $accountRepos->setUser($this->user);
 
-        $defaultCurrency   = app('amount')->getDefaultCurrencyByUser($this->user);
+        $defaultCurrency = app('amount')->getDefaultCurrencyByUser($this->user);
         $piggyBankCurrency = $accountRepos->getAccountCurrency($piggyBank->account) ?? $defaultCurrency;
 
         Log::debug(sprintf('Piggy bank #%d currency is %s', $piggyBank->id, $piggyBankCurrency->code));
 
         /** @var Transaction $source */
-        $source = $journal->transactions()->with(['Account'])->where('amount', '<', 0)->first();
+        $source = $journal->transactions()->with(['account'])->where('amount', '<', 0)->first();
         /** @var Transaction $destination */
-        $destination = $journal->transactions()->with(['Account'])->where('amount', '>', 0)->first();
+        $destination = $journal->transactions()->with(['account'])->where('amount', '>', 0)->first();
 
         // matches source, which means amount will be removed from piggy:
         if ($source->account_id === $piggyBank->account_id) {
@@ -189,28 +179,29 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
             Log::debug(sprintf('Currency will add money to piggy bank. Destination currency is %s', $currency->code));
         }
         if (null === $operator || null === $currency) {
+            Log::debug('Currency is NULL and operator is NULL, return "0".');
             return '0';
         }
         // currency of the account + the piggy bank currency are almost the same.
         // which amount from the transaction matches?
-        // $currency->id === $piggyBankCurrency->id
         $amount = null;
-        if ($source->transaction_currency_id === $currency->id) {
+        if ((int)$source->transaction_currency_id === (int)$currency->id) {
             Log::debug('Use normal amount');
             $amount = app('steam')->$operator($source->amount);
         }
-        if ($source->foreign_currency_id === $currency->id) {
+        if ((int)$source->foreign_currency_id === (int)$currency->id) {
             Log::debug('Use foreign amount');
             $amount = app('steam')->$operator($source->foreign_amount);
         }
         if (null === $amount) {
+            Log::debug('No match on currency, so amount remains null, return "0".');
             return '0';
         }
 
         Log::debug(sprintf('The currency is %s and the amount is %s', $currency->code, $amount));
 
 
-        $room    = bcsub((string)$piggyBank->targetamount, (string)$repetition->currentamount);
+        $room = bcsub((string)$piggyBank->targetamount, (string)$repetition->currentamount);
         $compare = bcmul($repetition->currentamount, '-1');
         Log::debug(sprintf('Will add/remove %f to piggy bank #%d ("%s")', $amount, $piggyBank->id, $piggyBank->name));
 
@@ -239,7 +230,7 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
      */
     public function getMaxOrder(): int
     {
-        return (int)$this->user->piggyBanks()->max('order');
+        return (int)$this->user->piggyBanks()->max('piggy_banks.order');
     }
 
     /**
@@ -265,9 +256,8 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
      */
     public function getPiggyBanks(): Collection
     {
-        return $this->user->piggyBanks()->with(['account'])->orderBy('order', 'ASC')->get();
+        return $this->user->piggyBanks()->with(['account', 'objectGroups'])->orderBy('order', 'ASC')->get();
     }
-
 
 
     /**
@@ -281,10 +271,11 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
         $currency = app('amount')->getDefaultCurrency();
 
         $set = $this->getPiggyBanks();
+
         /** @var PiggyBank $piggy */
         foreach ($set as $piggy) {
             $currentAmount = $this->getRepetition($piggy)->currentamount ?? '0';
-            $piggy->name   = $piggy->name . ' (' . app('amount')->formatAnything($currency, $currentAmount, false) . ')';
+            $piggy->name = $piggy->name . ' (' . app('amount')->formatAnything($currency, $currentAmount, false) . ')';
         }
 
 
@@ -312,13 +303,13 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
     public function getSuggestedMonthlyAmount(PiggyBank $piggyBank): string
     {
         $savePerMonth = '0';
-        $repetition   = $this->getRepetition($piggyBank);
+        $repetition = $this->getRepetition($piggyBank);
         if (null === $repetition) {
             return $savePerMonth;
         }
         if (null !== $piggyBank->targetdate && $repetition->currentamount < $piggyBank->targetamount) {
-            $now             = Carbon::now();
-            $diffInMonths    = $now->diffInMonths($piggyBank->targetdate, false);
+            $now = Carbon::now();
+            $diffInMonths = $now->diffInMonths($piggyBank->targetdate, false);
             $remainingAmount = bcsub($piggyBank->targetamount, $repetition->currentamount);
 
             // more than 1 month to go and still need money to save:
@@ -381,16 +372,38 @@ class PiggyBankRepository implements PiggyBankRepositoryInterface
         /** @var Storage $disk */
         $disk = Storage::disk('upload');
 
-        $set = $set->each(
+        return $set->each(
             static function (Attachment $attachment) use ($disk) {
-                $notes                   = $attachment->notes()->first();
+                $notes = $attachment->notes()->first();
                 $attachment->file_exists = $disk->exists($attachment->fileName());
-                $attachment->notes       = $notes ? $notes->text : '';
+                $attachment->notes = $notes ? $notes->text : '';
 
                 return $attachment;
             }
         );
+    }
 
-        return $set;
+
+    /**
+     * @inheritDoc
+     */
+    public function destroyAll(): void
+    {
+        $this->user->piggyBanks()->delete();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function searchPiggyBank(string $query, int $limit): Collection
+    {
+        $search = $this->user->piggyBanks();
+        if ('' !== $query) {
+            $search->where('piggy_banks.name', 'LIKE', sprintf('%%%s%%', $query));
+        }
+        $search->orderBy('piggy_banks.order', 'ASC')
+            ->orderBy('piggy_banks.name', 'ASC');
+
+        return $search->take($limit)->get();
     }
 }

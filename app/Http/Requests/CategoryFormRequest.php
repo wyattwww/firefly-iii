@@ -23,22 +23,16 @@ declare(strict_types=1);
 namespace FireflyIII\Http\Requests;
 
 use FireflyIII\Models\Category;
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class CategoryFormRequest.
  */
-class CategoryFormRequest extends Request
+class CategoryFormRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ConvertsDataTypes, ChecksLogin;
 
     /**
      * Get information for the controller.
@@ -48,7 +42,8 @@ class CategoryFormRequest extends Request
     public function getCategoryData(): array
     {
         return [
-            'name' => $this->string('name'),
+            'name'  => $this->string('name'),
+            'notes' => $this->nlString('notes'),
         ];
     }
 

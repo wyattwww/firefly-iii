@@ -66,6 +66,7 @@ class OtherCurrenciesCorrections extends Command
     /** @var JournalRepositoryInterface */
     private $journalRepos;
 
+
     /**
      * Execute the console command.
      *
@@ -101,10 +102,10 @@ class OtherCurrenciesCorrections extends Command
     private function getCurrency(Account $account): ?TransactionCurrency
     {
         $accountId = $account->id;
-        if (isset($this->accountCurrencies[$accountId]) && 0 === $this->accountCurrencies[$accountId]) {
+        if (array_key_exists($accountId, $this->accountCurrencies) && 0 === $this->accountCurrencies[$accountId]) {
             return null; // @codeCoverageIgnore
         }
-        if (isset($this->accountCurrencies[$accountId]) && $this->accountCurrencies[$accountId] instanceof TransactionCurrency) {
+        if (array_key_exists($accountId, $this->accountCurrencies) && $this->accountCurrencies[$accountId] instanceof TransactionCurrency) {
             return $this->accountCurrencies[$accountId]; // @codeCoverageIgnore
         }
         $currency = $this->accountRepos->getAccountCurrency($account);
@@ -133,6 +134,8 @@ class OtherCurrenciesCorrections extends Command
         /** @var Transaction $lead */
         $lead = null;
         switch ($journal->transactionType->type) {
+            default:
+                break;
             case TransactionType::WITHDRAWAL:
                 $lead = $journal->transactions()->where('amount', '<', 0)->first();
                 break;
@@ -141,19 +144,15 @@ class OtherCurrenciesCorrections extends Command
                 break;
             case TransactionType::OPENING_BALANCE:
                 // whichever isn't an initial balance account:
-                $lead = $journal->transactions()
-                                ->leftJoin('accounts', 'transactions.account_id', '=', 'accounts.id')
-                                ->leftJoin('account_types', 'accounts.account_type_id', '=', 'account_types.id')
-                                ->where('account_types.type', '!=', AccountType::INITIAL_BALANCE)
-                                ->first(['transactions.*']);
+                $lead = $journal->transactions()->leftJoin('accounts', 'transactions.account_id', '=', 'accounts.id')->leftJoin(
+                    'account_types', 'accounts.account_type_id', '=', 'account_types.id'
+                )->where('account_types.type', '!=', AccountType::INITIAL_BALANCE)->first(['transactions.*']);
                 break;
             case TransactionType::RECONCILIATION:
                 // whichever isn't the reconciliation account:
-                $lead = $journal->transactions()
-                                ->leftJoin('accounts', 'transactions.account_id', '=', 'accounts.id')
-                                ->leftJoin('account_types', 'accounts.account_type_id', '=', 'account_types.id')
-                                ->where('account_types.type', '!=', AccountType::RECONCILIATION)
-                                ->first(['transactions.*']);
+                $lead = $journal->transactions()->leftJoin('accounts', 'transactions.account_id', '=', 'accounts.id')->leftJoin(
+                    'account_types', 'accounts.account_type_id', '=', 'account_types.id'
+                )->where('account_types.type', '!=', AccountType::RECONCILIATION)->first(['transactions.*']);
                 break;
         }
 
@@ -167,7 +166,7 @@ class OtherCurrenciesCorrections extends Command
     {
         $configVar = app('fireflyconfig')->get(self::CONFIG_NAME, false);
         if (null !== $configVar) {
-            return (bool) $configVar->data;
+            return (bool)$configVar->data;
         }
 
         return false; // @codeCoverageIgnore
@@ -225,10 +224,7 @@ class OtherCurrenciesCorrections extends Command
             // @codeCoverageIgnoreStart
             $this->error(
                 sprintf(
-                    'Account #%d ("%s") has no currency preference, so transaction journal #%d can\'t be corrected',
-                    $account->id,
-                    $account->name,
-                    $journal->id
+                    'Account #%d ("%s") has no currency preference, so transaction journal #%d can\'t be corrected', $account->id, $account->name, $journal->id
                 )
             );
             $this->count++;
@@ -245,8 +241,8 @@ class OtherCurrenciesCorrections extends Command
                 }
 
                 // when mismatch in transaction:
-                if (!((int) $transaction->transaction_currency_id === (int) $currency->id)) {
-                    $transaction->foreign_currency_id     = (int) $transaction->transaction_currency_id;
+                if ((int)$transaction->transaction_currency_id !== (int)$currency->id) {
+                    $transaction->foreign_currency_id     = (int)$transaction->transaction_currency_id;
                     $transaction->foreign_amount          = $transaction->amount;
                     $transaction->transaction_currency_id = $currency->id;
                     $transaction->save();
@@ -262,21 +258,13 @@ class OtherCurrenciesCorrections extends Command
     /**
      * This routine verifies that withdrawals, deposits and opening balances have the correct currency settings for
      * the accounts they are linked to.
-     *
      * Both source and destination must match the respective currency preference of the related asset account.
      * So FF3 must verify all transactions.
-     *
      */
     private function updateOtherJournalsCurrencies(): void
     {
-        $set
-            = $this->cliRepos->getAllJournals(
-            [
-                TransactionType::WITHDRAWAL,
-                TransactionType::DEPOSIT,
-                TransactionType::OPENING_BALANCE,
-                TransactionType::RECONCILIATION,
-            ]
+        $set = $this->cliRepos->getAllJournals(
+            [TransactionType::WITHDRAWAL, TransactionType::DEPOSIT, TransactionType::OPENING_BALANCE, TransactionType::RECONCILIATION,]
         );
 
         /** @var TransactionJournal $journal */

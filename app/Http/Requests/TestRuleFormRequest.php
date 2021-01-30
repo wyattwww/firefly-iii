@@ -22,23 +22,18 @@ declare(strict_types=1);
 
 namespace FireflyIII\Http\Requests;
 
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\GetRuleConfiguration;
+use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Class TestRuleFormRequest.
  *
  * @codeCoverageIgnore
  */
-class TestRuleFormRequest extends Request
+class TestRuleFormRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use GetRuleConfiguration, ChecksLogin;
 
     /**
      * Rules for this request.
@@ -49,12 +44,11 @@ class TestRuleFormRequest extends Request
     public function rules(): array
     {
         // fixed
-        $validTriggers = array_keys(config('firefly.rule-triggers'));
-        $rules         = [
+        $validTriggers = $this->getTriggers();
+
+        return [
             'rule-trigger.*'       => 'required|min:1|in:' . implode(',', $validTriggers),
             'rule-trigger-value.*' => 'required|min:1|ruleTriggerValue',
         ];
-
-        return $rules;
     }
 }

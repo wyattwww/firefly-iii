@@ -26,7 +26,10 @@ use Carbon\Carbon;
 use FireflyIII\Models\Account;
 use FireflyIII\Repositories\Account\AccountRepositoryInterface;
 use FireflyIII\Repositories\User\UserRepositoryInterface;
+use FireflyIII\Support\Search\OperatorQuerySearch;
 use League\CommonMark\CommonMarkConverter;
+use League\CommonMark\Environment;
+use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use Route;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -60,10 +63,22 @@ class General extends AbstractExtension
             $this->activeRouteStrict(),
             $this->activeRoutePartial(),
             $this->activeRoutePartialObjectType(),
+            $this->menuOpenRoutePartial(),
             $this->formatDate(),
             $this->getMetaField(),
             $this->hasRole(),
+            $this->getRootSearchOperator(),
         ];
+    }
+
+    protected function getRootSearchOperator(): TwigFunction
+    {
+        return new TwigFunction(
+            'getRootSearchOperator',
+            static function (string $operator): string {
+                return OperatorQuerySearch::getRootOperator($operator);
+            }
+        );
     }
 
     /**
@@ -80,7 +95,7 @@ class General extends AbstractExtension
                 $args  = func_get_args();
                 $route = $args[0]; // name of the route.
                 $name  = Route::getCurrentRoute()->getName() ?? '';
-                if (!(false === strpos($name, $route))) {
+                if (false !== strpos($name, $route)) {
                     return 'active';
                 }
 
@@ -90,8 +105,31 @@ class General extends AbstractExtension
     }
 
     /**
+     * Will return "menu-open" when a part of the route matches the argument.
+     * ie. "accounts" will match "accounts.index".
+     *
+     * @return TwigFunction
+     */
+    protected function menuOpenRoutePartial(): TwigFunction
+    {
+        return new TwigFunction(
+            'menuOpenRoutePartial',
+            static function (): string {
+                $args  = func_get_args();
+                $route = $args[0]; // name of the route.
+                $name  = Route::getCurrentRoute()->getName() ?? '';
+                if (false !== strpos($name, $route)) {
+                    return 'menu-open';
+                }
+
+                return '';
+            }
+        );
+    }
+
+    /**
      * This function will return "active" when the current route matches the first argument (even partly)
-     * but, the variable $what has been set and matches the second argument.
+     * but, the variable $objectType has been set and matches the second argument.
      *
      * @return TwigFunction
      */
@@ -103,7 +141,7 @@ class General extends AbstractExtension
                 [, $route, $objectType] = func_get_args();
                 $activeObjectType = $context['objectType'] ?? false;
 
-                if ($objectType === $activeObjectType && !(false === stripos(Route::getCurrentRoute()->getName(), $route))) {
+                if ($objectType === $activeObjectType && false !== stripos(Route::getCurrentRoute()->getName(), $route)) {
                     return 'active';
                 }
 
@@ -201,6 +239,8 @@ class General extends AbstractExtension
 
     /**
      * @return TwigFunction
+     * @deprecated  because it uses a query in a view
+     * TODO remove me.
      */
     protected function getMetaField(): TwigFunction
     {
@@ -247,7 +287,10 @@ class General extends AbstractExtension
         return new TwigFilter(
             'markdown',
             static function (string $text): string {
-                $converter = new CommonMarkConverter;
+                $environment = Environment::createCommonMarkEnvironment();
+                $environment->addExtension(new GithubFlavoredMarkdownExtension());
+
+                $converter = new CommonMarkConverter(['allow_unsafe_links' => false, 'max_nesting_level' => 3, 'html_input' => 'escape'], $environment);
 
                 return $converter->convertToHtml($text);
             }, ['is_safe' => ['html']]

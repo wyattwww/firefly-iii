@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Editează pușculița ":name"',
     'preferences'            => 'Preferințe',
     'profile'                => 'Profil',
+    'accounts'               => 'Accounts',
     'changePassword'         => 'Modificare parolă',
     'change_email'           => 'Modificare adresă de email',
     'bills'                  => 'Facturi',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Şterge legătura dintre tranzacţii',
     'telemetry_index'        => 'Telemetrie',
     'telemetry_view'         => 'Vizualizare telemetrie',
+    'edit_object_group'      => 'Edit group ":title"',
+    'delete_object_group'    => 'Delete group ":title"',
+    'logout_others'          => 'Logout other sessions'
 ];

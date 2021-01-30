@@ -111,7 +111,7 @@ class AvailableBudgetController extends Controller
      */
     public function createAlternative(Request $request, Carbon $start, Carbon $end)
     {
-        $currencies       = $this->currencyRepos->getEnabled();
+        $currencies       = $this->currencyRepos->get();
         $availableBudgets = $this->abRepository->get($start, $end);
 
         // remove already budgeted currencies:
@@ -157,7 +157,7 @@ class AvailableBudgetController extends Controller
      */
     public function edit(AvailableBudget $availableBudget, Carbon $start, Carbon $end)
     {
-        $availableBudget->amount = round($availableBudget->amount, $availableBudget->transactionCurrency->decimal_places);
+        $availableBudget->amount = number_format((float) $availableBudget->amount, $availableBudget->transactionCurrency->decimal_places, '.', '');
         return view('budgets.available-budgets.edit', compact('availableBudget', 'start', 'end'));
     }
 
@@ -185,7 +185,7 @@ class AvailableBudgetController extends Controller
 
             return redirect(route('budgets.index', [$start->format('Y-m-d'), $end->format('Y-m-d')]));
         }
-        if (0 === bccomp('0', $amount)) {
+        if (bccomp($amount, '0') <= 0) {
             session()->flash('error', trans('firefly.invalid_amount'));
 
             return redirect(route('budgets.index', [$start->format('Y-m-d'), $end->format('Y-m-d')]));
@@ -198,7 +198,8 @@ class AvailableBudgetController extends Controller
 
             return redirect(route('budgets.index', [$start->format('Y-m-d'), $end->format('Y-m-d')]));
         }
-
+        $start->startOfDay();
+        $end->endOfDay();
         // find existing AB
         $existing = $this->abRepository->find($currency, $start, $end);
         if (null === $existing) {
@@ -238,7 +239,7 @@ class AvailableBudgetController extends Controller
 
             return redirect(route('budgets.index', [$start->format('Y-m-d'), $end->format('Y-m-d')]));
         }
-        if (0 === bccomp('0', $amount)) {
+        if (bccomp($amount, '0') <= 0) {
             session()->flash('error', trans('firefly.invalid_amount'));
 
             return redirect(route('budgets.index', [$start->format('Y-m-d'), $end->format('Y-m-d')]));

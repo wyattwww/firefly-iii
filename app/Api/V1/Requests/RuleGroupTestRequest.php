@@ -22,22 +22,21 @@
 
 declare(strict_types=1);
 
-
 namespace FireflyIII\Api\V1\Requests;
 
 
 use Carbon\Carbon;
-use FireflyIII\Models\Account;
-use FireflyIII\Models\AccountType;
-use FireflyIII\Repositories\Account\AccountRepositoryInterface;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Collection;
-use Log;
 
 /**
  * Class RuleGroupTestRequest
  */
-class RuleGroupTestRequest extends Request
+class RuleGroupTestRequest extends FormRequest
 {
+    use ConvertsDataTypes;
+
     /**
      * Authorize logged in users.
      *
@@ -55,45 +54,10 @@ class RuleGroupTestRequest extends Request
     public function getTestParameters(): array
     {
         return [
-            'page'          => $this->getPage(),
-            'start_date'    => $this->getDate('start_date'),
-            'end_date'      => $this->getDate('end_date'),
-            'search_limit'  => $this->getSearchLimit(),
-            'trigger_limit' => $this->getTriggerLimit(),
-            'accounts'      => $this->getAccounts(),
+            'start'    => $this->getDate('start'),
+            'end'      => $this->getDate('end'),
+            'accounts' => $this->getAccounts(),
         ];
-    }
-
-    /**
-     * @return array
-     */
-    public function rules(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return Collection
-     */
-    private function getAccounts(): Collection
-    {
-        $accountList = '' === (string) $this->query('accounts') ? [] : explode(',', $this->query('accounts'));
-        $accounts    = new Collection;
-
-        /** @var AccountRepositoryInterface $accountRepository */
-        $accountRepository = app(AccountRepositoryInterface::class);
-
-        foreach ($accountList as $accountId) {
-            Log::debug(sprintf('Searching for asset account with id "%s"', $accountId));
-            $account = $accountRepository->findNull((int) $accountId);
-            if ($this->validAccount($account)) {
-                /** @noinspection NullPointerExceptionInspection */
-                Log::debug(sprintf('Found account #%d ("%s") and its an asset account', $account->id, $account->name));
-                $accounts->push($account);
-            }
-        }
-
-        return $accounts;
     }
 
     /**
@@ -103,45 +67,28 @@ class RuleGroupTestRequest extends Request
      */
     private function getDate(string $field): ?Carbon
     {
-        /** @var Carbon $result */
-        $result = null === $this->query($field) ? null : Carbon::createFromFormat('Y-m-d', $this->query($field));
-
-        return $result;
+        return null === $this->query($field) ? null : Carbon::createFromFormat('Y-m-d', $this->query($field));
     }
 
     /**
-     * @return int
+     * @return Collection
      */
-    private function getPage(): int
+    private function getAccounts(): string
     {
-        return 0 === (int) $this->query('page') ? 1 : (int) $this->query('page');
-
+        return (string) $this->query('accounts');
     }
 
     /**
-     * @return int
+     * @return array
      */
-    private function getSearchLimit(): int
+    public function rules(): array
     {
-        return 0 === (int) $this->query('search_limit') ? (int) config('firefly.test-triggers.limit') : (int) $this->query('search_limit');
-    }
-
-    /**
-     * @return int
-     */
-    private function getTriggerLimit(): int
-    {
-        return 0 === (int) $this->query('triggered_limit') ? (int) config('firefly.test-triggers.range') : (int) $this->query('triggered_limit');
-    }
-
-    /**
-     * @param Account|null $account
-     *
-     * @return bool
-     */
-    private function validAccount(?Account $account): bool
-    {
-        return null !== $account && AccountType::ASSET === $account->accountType->type;
+        return [
+            'start'      => 'date',
+            'end'        => 'date|after:start',
+            'accounts'   => '',
+            'accounts.*' => 'exists:accounts,id|belongsToUser:accounts',
+        ];
     }
 
 }

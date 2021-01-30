@@ -23,7 +23,8 @@ declare(strict_types=1);
 
 namespace FireflyIII\Api\V1\Controllers;
 
-use FireflyIII\Api\V1\Requests\CategoryRequest;
+use FireflyIII\Api\V1\Requests\CategoryStoreRequest;
+use FireflyIII\Api\V1\Requests\CategoryUpdateRequest;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Helpers\Collector\GroupCollectorInterface;
 use FireflyIII\Models\Category;
@@ -42,13 +43,12 @@ use League\Fractal\Resource\Item;
 
 /**
  * Class CategoryController.
- *
  */
 class CategoryController extends Controller
 {
     use TransactionFilter;
-    /** @var CategoryRepositoryInterface The category repository */
-    private $repository;
+    private CategoryRepositoryInterface $repository;
+
 
     /**
      * CategoryController constructor.
@@ -98,7 +98,7 @@ class CategoryController extends Controller
         $resource = new FractalCollection($attachments, $transformer, 'attachments');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -146,7 +146,7 @@ class CategoryController extends Controller
         $resource = new FractalCollection($categories, $transformer, 'categories');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
 
@@ -168,18 +168,18 @@ class CategoryController extends Controller
 
         $resource = new Item($category, $transformer, 'categories');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
      * Store new category.
      *
-     * @param CategoryRequest $request
+     * @param CategoryStoreRequest $request
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
-    public function store(CategoryRequest $request): JsonResponse
+    public function store(CategoryStoreRequest $request): JsonResponse
     {
         $category = $this->repository->store($request->getAll());
         $manager  = $this->getManager();
@@ -190,7 +190,7 @@ class CategoryController extends Controller
 
         $resource = new Item($category, $transformer, 'categories');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -246,18 +246,18 @@ class CategoryController extends Controller
         $resource = new FractalCollection($transactions, $transformer, 'transactions');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
      * Update the category.
      *
-     * @param CategoryRequest $request
+     * @param CategoryUpdateRequest $request
      * @param Category        $category
      *
      * @return JsonResponse
      */
-    public function update(CategoryRequest $request, Category $category): JsonResponse
+    public function update(CategoryUpdateRequest $request, Category $category): JsonResponse
     {
         $data     = $request->getAll();
         $category = $this->repository->update($category, $data);
@@ -269,7 +269,7 @@ class CategoryController extends Controller
 
         $resource = new Item($category, $transformer, 'categories');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 

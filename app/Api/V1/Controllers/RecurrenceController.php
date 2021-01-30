@@ -48,8 +48,10 @@ use Log;
 class RecurrenceController extends Controller
 {
     use TransactionFilter;
+
     /** @var RecurringRepositoryInterface The recurring transaction repository */
     private $repository;
+
 
     /**
      * RecurrenceController constructor.
@@ -117,7 +119,7 @@ class RecurrenceController extends Controller
         $resource = new FractalCollection($piggyBanks, $transformer, 'recurrences');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -139,7 +141,7 @@ class RecurrenceController extends Controller
 
         $resource = new Item($recurrence, $transformer, 'recurrences');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
 
     }
@@ -149,8 +151,8 @@ class RecurrenceController extends Controller
      *
      * @param RecurrenceStoreRequest $request
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
     public function store(RecurrenceStoreRequest $request): JsonResponse
     {
@@ -164,7 +166,7 @@ class RecurrenceController extends Controller
 
         $resource = new Item($recurrence, $transformer, 'recurrences');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -220,13 +222,13 @@ class RecurrenceController extends Controller
         $resource = new FractalCollection($transactions, $transformer, 'transactions');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
+     * @return JsonResponse
      * @throws FireflyException
      * @codeCoverageIgnore
-     * @return JsonResponse
      */
     public function trigger(): JsonResponse
     {
@@ -236,7 +238,7 @@ class RecurrenceController extends Controller
             $result = $recurring->fire();
         } catch (FireflyException $e) {
             Log::error($e->getMessage());
-            throw new FireflyException('200022: Error in cron job.');
+            throw new FireflyException('200022: Error in cron job.', 0, $e);
         }
         if (false === $result) {
             return response()->json([], 204);
@@ -268,7 +270,7 @@ class RecurrenceController extends Controller
 
         $resource = new Item($category, $transformer, 'recurrences');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 }

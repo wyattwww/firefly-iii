@@ -24,6 +24,7 @@ namespace FireflyIII\Providers;
 
 use Exception;
 use FireflyIII\Events\AdminRequestedTestMessage;
+use FireflyIII\Events\DetectedNewIPAddress;
 use FireflyIII\Events\RegisteredUser;
 use FireflyIII\Events\RequestedNewPassword;
 use FireflyIII\Events\RequestedReportOnJournals;
@@ -67,6 +68,10 @@ class EventServiceProvider extends ServiceProvider
             Login::class                       => [
                 'FireflyIII\Handlers\Events\UserEventHandler@checkSingleUserIsAdmin',
                 'FireflyIII\Handlers\Events\UserEventHandler@demoUserBackToEnglish',
+                'FireflyIII\Handlers\Events\UserEventHandler@storeUserIPAddress',
+            ],
+            DetectedNewIPAddress::class => [
+                'FireflyIII\Handlers\Events\UserEventHandler@notifyNewIPAddress',
             ],
             RequestedVersionCheckStatus::class => [
                 'FireflyIII\Handlers\Events\VersionCheckEventHandler@checkForUpdates',
@@ -94,6 +99,7 @@ class EventServiceProvider extends ServiceProvider
             ],
             // is a Transaction Journal related event.
             UpdatedTransactionGroup::class   => [
+                'FireflyIII\Handlers\Events\UpdatedGroupEventHandler@unifyAccounts',
                 'FireflyIII\Handlers\Events\UpdatedGroupEventHandler@processRules',
             ],
             // API related events:
@@ -140,6 +146,12 @@ class EventServiceProvider extends ServiceProvider
 
                 $email     = $user->email;
                 $ipAddress = Request::ip();
+
+                // see if user has alternative email address:
+                $pref = app('preferences')->getForUser($user, 'remote_guard_alt_email', null);
+                if (null !== $pref) {
+                    $email = $pref->data;
+                }
 
                 Log::debug(sprintf('Now in EventServiceProvider::registerCreateEvents. Email is %s, IP is %s', $email, $ipAddress));
                 try {

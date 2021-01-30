@@ -33,6 +33,14 @@ return [
     'admin_test_subject'               => 'Eine Textnachricht von Ihrer Firefly III Installation',
     'admin_test_body'                  => 'Dies ist eine Testnachricht von Ihrer Firefly III-Instanz. Sie wurde an :email gesendet.',
 
+    // new IP
+    'login_from_new_ip'                => 'Neue Anmeldung bei Firefly III',
+    'new_ip_body'                      => 'Firefly III hat eine neue Anmeldung auf Ihrem Konto von einer unbekannten IP-Adresse erkannt. Wenn Sie sich noch nie von der unten angegebenen IP-Adresse aus angemeldet haben oder dies mehr als sechs Monate her ist, warnt Sie Firefly III.',
+    'new_ip_warning'                   => 'Wenn Sie diese IP-Adresse oder diese Anmeldung erkennen, können Sie diese Meldung ignorieren. Wenn Sie sich nicht angemeldet haben, oder wenn Sie keine Ahnung haben, worum es hier geht, überprüfen Sie die Sicherheit Ihres Passworts, ändern Sie es und melden Sie alle anderen Sitzungen ab. Rufen Sie dazu Ihre Profilseite auf. Es wird empfohlen die Zwei-Faktor-Authentifizierung (2FA) zu aktivieren. Bleiben Sie geschützt!',
+    'ip_address'                       => 'IP-Adresse',
+    'host_name'                        => 'Host',
+    'date_time'                        => 'Datum und Uhrzeit',
+
     // access token created
     'access_token_created_subject'     => 'Ein neuer Zugriffstoken wurde erstellt',
     'access_token_created_body'        => 'Jemand (hoffentlich Sie) hat gerade einen neuen Firefly III API Zugangstoken für Ihr Benutzerkonto erstellt.',
@@ -44,7 +52,7 @@ return [
     'registered_welcome'               => 'Willkommen bei <a style="color:#337ab7" href=":address">Firefly III</a>. Ihre Registrierung ist abgeschlossen und diese E-Mail ist hier, um es zu bestätigen. Juhu!',
     'registered_pw'                    => 'Wenn Sie Ihr Passwort bereits vergessen haben, setzen Sie es bitte über <a style="color:#337ab7" href=":address/password/reset">das Passwort-Reset Tool</a> zurück.',
     'registered_help'                  => 'Es gibt ein Hilfe-Icon in der oberen rechten Ecke jeder Seite. Wenn Sie Hilfe benötigen, klicken Sie dort drauf!',
-    'registered_doc_html'              => 'Wenn Sie es noch nicht getan haben, lesen Sie bitte die <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/grand-theory">Großtheorie</a>.',
+    'registered_doc_html'              => 'Falls Sie es noch nicht getan haben, lesen Sie bitte die <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/personal-finances">Grundtheorie</a>.',
     'registered_doc_text'              => 'Wenn Sie dies noch nicht getan haben, lesen Sie bitte die Anleitung zu den ersten Schritten und die vollständige Beschreibung.',
     'registered_closing'               => 'Viel Spaß!',
     'registered_firefly_iii_link'      => 'Firefly III:',

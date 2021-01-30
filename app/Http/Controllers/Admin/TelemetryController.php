@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 /**
  * TelemetryController.php
- * Copyright (c) 2020 thegrumpydictator@gmail.com
+ * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -20,9 +20,10 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace FireflyIII\Http\Controllers\Admin;
 
-use Carbon\Carbon;
 use FireflyIII\Http\Controllers\Controller;
 use FireflyIII\Jobs\SubmitTelemetryData;
 use FireflyIII\Repositories\Telemetry\TelemetryRepositoryInterface;
@@ -85,7 +86,7 @@ class TelemetryController extends Controller
     public function submit()
     {
         $job = app(SubmitTelemetryData::class);
-        $job->setDate(new Carbon);
+        $job->setDate(today(config('app.timezone')));
         $job->setForce(true);
         $job->handle();
         session()->flash('info', trans('firefly.telemetry_submission_executed'));

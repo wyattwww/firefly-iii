@@ -40,6 +40,8 @@ class Steam
 {
 
     /**
+     * Gets balance at the end of current month by default
+     *
      * @param \FireflyIII\Models\Account $account
      * @param \Carbon\Carbon             $date
      *
@@ -47,14 +49,12 @@ class Steam
      */
     public function balance(Account $account, Carbon $date, ?TransactionCurrency $currency = null): string
     {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
-        }
         // abuse chart properties:
         $cache = new CacheProperties;
         $cache->addProperty($account->id);
         $cache->addProperty('balance');
         $cache->addProperty($date);
+        $cache->addProperty($currency ? $currency->id : 0);
         if ($cache->has()) {
             return $cache->get(); // @codeCoverageIgnore
         }
@@ -103,9 +103,6 @@ class Steam
      */
     public function balanceIgnoreVirtual(Account $account, Carbon $date): string
     {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
-        }
         // abuse chart properties:
         $cache = new CacheProperties;
         $cache->addProperty($account->id);
@@ -175,9 +172,6 @@ class Steam
      */
     public function balanceInRange(Account $account, Carbon $start, Carbon $end, ?TransactionCurrency $currency = null): array
     {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
-        }
         // abuse chart properties:
         $cache = new CacheProperties;
         $cache->addProperty($account->id);
@@ -193,7 +187,7 @@ class Steam
         $end->addDay();
         $balances     = [];
         $formatted    = $start->format('Y-m-d');
-        $startBalance = $this->balance($account, $start);
+        $startBalance = $this->balance($account, $start, $currency);
 
         /** @var AccountRepositoryInterface $repository */
 
@@ -203,7 +197,7 @@ class Steam
             $repository->setUser($account->user);
             $currency = $repository->getAccountCurrency($account) ?? app('amount')->getDefaultCurrencyByUser($account->user);
         }
-        $currencyId = $currency->id;
+        $currencyId = (int)$currency->id;
 
         $start->addDay();
 
@@ -234,17 +228,17 @@ class Steam
             $modified        = null === $entry->modified ? '0' : (string)$entry->modified;
             $foreignModified = null === $entry->modified_foreign ? '0' : (string)$entry->modified_foreign;
             $amount          = '0';
-            if ($currencyId === (int)$entry->transaction_currency_id || 0 === $currencyId) {
+            if ($currencyId === (int) $entry->transaction_currency_id || 0 === $currencyId) {
                 // use normal amount:
                 $amount = $modified;
             }
-            if ($currencyId === (int)$entry->foreign_currency_id) {
+            if ($currencyId === (int) $entry->foreign_currency_id) {
                 // use foreign amount:
                 $amount = $foreignModified;
             }
 
             $currentBalance  = bcadd($currentBalance, $amount);
-            $carbon          = new Carbon($entry->date);
+            $carbon          = new Carbon($entry->date, config('app.timezone'));
             $date            = $carbon->format('Y-m-d');
             $balances[$date] = $currentBalance;
         }
@@ -262,9 +256,6 @@ class Steam
      */
     public function balancePerCurrency(Account $account, Carbon $date): array
     {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
-        }
         // abuse chart properties:
         $cache = new CacheProperties;
         $cache->addProperty($account->id);
@@ -298,9 +289,6 @@ class Steam
      */
     public function balancesByAccounts(Collection $accounts, Carbon $date): array
     {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
-        }
         $ids = $accounts->pluck('id')->toArray();
         // cache this property.
         $cache = new CacheProperties;
@@ -333,9 +321,6 @@ class Steam
      */
     public function balancesPerCurrencyByAccounts(Collection $accounts, Carbon $date): array
     {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
-        }
         $ids = $accounts->pluck('id')->toArray();
         // cache this property.
         $cache = new CacheProperties;
@@ -362,8 +347,10 @@ class Steam
      * Remove weird chars from strings.
      *
      * @param string $string
+     * TODO migrate to trait.
      *
      * @return string
+     * @deprecated
      */
     public function cleanString(string $string): string
     {
@@ -425,8 +412,10 @@ class Steam
      * Remove weird chars from strings, but keep newlines and tabs.
      *
      * @param string $string
+     * TODO migrate to trait.
      *
      * @return string
+     * @deprecated
      */
     public function nlCleanString(string $string): string
     {
@@ -491,9 +480,6 @@ class Steam
      */
     public function getLastActivities(array $accounts): array
     {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
-        }
         $list = [];
 
         $set = auth()->user()->transactions()
@@ -502,7 +488,9 @@ class Steam
                      ->get(['transactions.account_id', DB::raw('MAX(transaction_journals.date) AS max_date')]);
 
         foreach ($set as $entry) {
-            $list[(int)$entry->account_id] = new Carbon($entry->max_date);
+            $date = new Carbon($entry->max_date,'UTC');
+            $date->setTimezone(config('app.timezone'));
+            $list[(int)$entry->account_id] = $date;
         }
 
         return $list;
@@ -532,9 +520,7 @@ class Steam
         if (null === $amount) {
             return null;
         }
-        $amount = bcmul($amount, '-1');
-
-        return $amount;
+        return bcmul($amount, '-1');
     }
 
     /**
@@ -546,21 +532,21 @@ class Steam
     {
         $string = strtolower($string);
 
-        if (!(false === stripos($string, 'k'))) {
+        if (false !== stripos($string, 'k')) {
             // has a K in it, remove the K and multiply by 1024.
             $bytes = bcmul(rtrim($string, 'kK'), '1024');
 
             return (int)$bytes;
         }
 
-        if (!(false === stripos($string, 'm'))) {
+        if (false !== stripos($string, 'm')) {
             // has a M in it, remove the M and multiply by 1048576.
             $bytes = bcmul(rtrim($string, 'mM'), '1048576');
 
             return (int)$bytes;
         }
 
-        if (!(false === stripos($string, 'g'))) {
+        if (false !== stripos($string, 'g')) {
             // has a G in it, remove the G and multiply by (1024)^3.
             $bytes = bcmul(rtrim($string, 'gG'), '1073741824');
 
@@ -604,7 +590,12 @@ class Steam
         /** @var string $language */
         $locale = app('preferences')->get('locale', config('firefly.default_locale', 'equal'))->data;
         if ('equal' === $locale) {
-            return $this->getLanguage();
+            $locale = $this->getLanguage();
+        }
+        
+        // Check for Windows to replace the locale correctly.
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $locale = str_replace('_', '-', $locale);
         }
 
         return $locale;

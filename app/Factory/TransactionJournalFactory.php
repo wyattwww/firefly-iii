@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace FireflyIII\Factory;
 
-use Carbon\Carbon;
 use Exception;
 use FireflyIII\Exceptions\DuplicateTransactionException;
 use FireflyIII\Exceptions\FireflyException;
@@ -56,28 +55,16 @@ class TransactionJournalFactory
 {
     use JournalServiceTrait;
 
-    /** @var AccountRepositoryInterface */
-    private $accountRepository;
-    /** @var AccountValidator */
-    private $accountValidator;
-    /** @var BillRepositoryInterface */
-    private $billRepository;
-    /** @var CurrencyRepositoryInterface */
-    private $currencyRepository;
-    /** @var bool */
-    private $errorOnHash;
-    /** @var array */
-    private $fields;
-    /** @var PiggyBankEventFactory */
-    private $piggyEventFactory;
-    /** @var PiggyBankRepositoryInterface */
-    private $piggyRepository;
-    /** @var TransactionFactory */
-    private $transactionFactory;
-    /** @var TransactionTypeRepositoryInterface */
-    private $typeRepository;
-    /** @var User The user */
-    private $user;
+    private AccountRepositoryInterface         $accountRepository;
+    private AccountValidator                   $accountValidator;
+    private BillRepositoryInterface            $billRepository;
+    private CurrencyRepositoryInterface        $currencyRepository;
+    private bool                               $errorOnHash;
+    private array                              $fields;
+    private PiggyBankEventFactory              $piggyEventFactory;
+    private PiggyBankRepositoryInterface       $piggyRepository;
+    private TransactionTypeRepositoryInterface $typeRepository;
+    private User                               $user;
 
     /**
      * Constructor.
@@ -88,11 +75,12 @@ class TransactionJournalFactory
     public function __construct()
     {
         $this->errorOnHash = false;
-        $this->fields      = [
+        // TODO move valid meta fields to config.
+        $this->fields = [
             // sepa
             'sepa_cc', 'sepa_ct_op', 'sepa_ct_id',
             'sepa_db', 'sepa_country', 'sepa_ep',
-            'sepa_ci', 'sepa_batch_id',
+            'sepa_ci', 'sepa_batch_id', 'external_uri',
 
             // dates
             'interest_date', 'book_date', 'process_date',
@@ -100,7 +88,11 @@ class TransactionJournalFactory
 
             // others
             'recurrence_id', 'internal_reference', 'bunq_payment_id',
-            'import_hash', 'import_hash_v2', 'external_id', 'original_source'];
+            'import_hash', 'import_hash_v2', 'external_id', 'original_source',
+
+            // recurring transactions
+            'recurrence_total', 'recurrence_count',
+        ];
 
 
         if ('testing' === config('app.env')) {
@@ -109,7 +101,6 @@ class TransactionJournalFactory
 
         $this->currencyRepository = app(CurrencyRepositoryInterface::class);
         $this->typeRepository     = app(TransactionTypeRepositoryInterface::class);
-        $this->transactionFactory = app(TransactionFactory::class);
         $this->billRepository     = app(BillRepositoryInterface::class);
         $this->budgetRepository   = app(BudgetRepositoryInterface::class);
         $this->categoryRepository = app(CategoryRepositoryInterface::class);
@@ -125,12 +116,13 @@ class TransactionJournalFactory
      *
      * @param array $data
      *
-     * @throws DuplicateTransactionException
-     * @throws FireflyException
      * @return Collection
+     * @throws FireflyException
+     * @throws DuplicateTransactionException
      */
     public function create(array $data): Collection
     {
+        Log::debug('Now in TransactionJournalFactory::create()');
         // convert to special object.
         $dataObject = new NullArrayObject($data);
 
@@ -192,7 +184,6 @@ class TransactionJournalFactory
         $this->user = $user;
         $this->currencyRepository->setUser($this->user);
         $this->tagFactory->setUser($user);
-        $this->transactionFactory->setUser($this->user);
         $this->billRepository->setUser($this->user);
         $this->budgetRepository->setUser($this->user);
         $this->categoryRepository->setUser($this->user);
@@ -243,9 +234,9 @@ class TransactionJournalFactory
     /**
      * @param NullArrayObject $row
      *
-     * @throws FireflyException
-     * @throws DuplicateTransactionException
      * @return TransactionJournal|null
+     * @throws DuplicateTransactionException
+     * @throws FireflyException
      */
     private function createJournal(NullArrayObject $row): ?TransactionJournal
     {
@@ -255,7 +246,7 @@ class TransactionJournalFactory
 
         /** Some basic fields */
         $type            = $this->typeRepository->findTransactionType(null, $row['type']);
-        $carbon          = $row['date'] ?? new Carbon;
+        $carbon          = $row['date'] ?? today(config('app.timezone'));
         $order           = $row['order'] ?? 0;
         $currency        = $this->currencyRepository->findCurrency((int) $row['currency_id'], $row['currency_code']);
         $foreignCurrency = $this->currencyRepository->findCurrencyNull($row['foreign_currency_id'], $row['foreign_currency_code']);
@@ -303,10 +294,10 @@ class TransactionJournalFactory
         Log::debug('Now calling getAccount for the destination.');
         $destinationAccount = $this->getAccount($type->type, 'destination', $destInfo);
         Log::debug('Done with getAccount(2x)');
-        $currency           = $this->getCurrencyByAccount($type->type, $currency, $sourceAccount, $destinationAccount);
-        $foreignCurrency    = $this->compareCurrencies($currency, $foreignCurrency);
-        $foreignCurrency    = $this->getForeignByAccount($type->type, $foreignCurrency, $destinationAccount);
-        $description        = $this->getDescription($description);
+        $currency        = $this->getCurrencyByAccount($type->type, $currency, $sourceAccount, $destinationAccount);
+        $foreignCurrency = $this->compareCurrencies($currency, $foreignCurrency);
+        $foreignCurrency = $this->getForeignByAccount($type->type, $foreignCurrency, $destinationAccount);
+        $description     = $this->getDescription($description);
 
         /** Create a basic journal. */
         $journal = TransactionJournal::create(
@@ -325,7 +316,6 @@ class TransactionJournalFactory
         Log::debug(sprintf('Created new journal #%d: "%s"', $journal->id, $journal->description));
 
         /** Create two transactions. */
-        /** @var TransactionFactory $transactionFactory */
         $transactionFactory = app(TransactionFactory::class);
         $transactionFactory->setUser($this->user);
         $transactionFactory->setJournal($journal);
@@ -367,19 +357,6 @@ class TransactionJournalFactory
 
         // verify that journal has two transactions. Otherwise, delete and cancel.
         // TODO this can't be faked so it can't be tested.
-        //        $count = $journal->transactions()->count();
-        //        if (2 !== $count) {
-        //            // @codeCoverageIgnoreStart
-        //            Log::error(sprintf('The journal unexpectedly has %d transaction(s). This is not OK. Cancel operation.', $count));
-        //            try {
-        //                $journal->delete();
-        //            } catch (Exception $e) {
-        //                Log::debug(sprintf('Dont care: %s.', $e->getMessage()));
-        //            }
-        //
-        //            return null;
-        //            // @codeCoverageIgnoreEnd
-        //        }
         $journal->completed = true;
         $journal->save();
 
@@ -606,8 +583,8 @@ class TransactionJournalFactory
         $this->accountValidator->setTransactionType($transactionType);
 
         // validate source account.
-        $sourceId    = isset($data['source_id']) ? (int) $data['source_id'] : null;
-        $sourceName  = isset($data['source_name']) ? (string) $data['source_name'] : null;
+        $sourceId    = $data['source_id'] ? (int) $data['source_id'] : null;
+        $sourceName  = $data['source_name'] ? (string) $data['source_name'] : null;
         $validSource = $this->accountValidator->validateSource($sourceId, $sourceName, null);
 
         // do something with result:
@@ -616,8 +593,8 @@ class TransactionJournalFactory
         }
         Log::debug('Source seems valid.');
         // validate destination account
-        $destinationId    = isset($data['destination_id']) ? (int) $data['destination_id'] : null;
-        $destinationName  = isset($data['destination_name']) ? (string) $data['destination_name'] : null;
+        $destinationId    = $data['destination_id'] ? (int) $data['destination_id'] : null;
+        $destinationName  = $data['destination_name'] ? (string) $data['destination_name'] : null;
         $validDestination = $this->accountValidator->validateDestination($destinationId, $destinationName, null);
         // do something with result:
         if (false === $validDestination) {

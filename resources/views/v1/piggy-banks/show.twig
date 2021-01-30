@@ -30,12 +30,18 @@
                         </div>
                     </div>
                 </div>
-                <div class="box-body table-responsive no-padding">
-                    <table class="table table-hover" id="piggyDetails">
+                <div class="box-body no-padding">
+                    <table class="table table-responsive table-hover" id="piggyDetails">
                         <tr>
                             <td style="width:40%;">{{ 'account'|_ }}</td>
                             <td><a href="{{ route('accounts.show', piggyBank.account_id) }}">{{ piggyBank.account.name }}</a></td>
                         </tr>
+                        {% if piggy.object_group_title %}
+                        <tr>
+                            <td style="width:40%;">{{ 'object_group'|_ }}</td>
+                            <td>{{ piggy.object_group_title }}</a></td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <td>{{ 'target_amount'|_ }}</td>
                             <td>
@@ -90,7 +96,7 @@
                 <div class="box-header with-border">
                     <h3 class="box-title">{{ 'transactions'|_ }}</h3>
                 </div>
-                <div class="box-body table-responsive no-padding" id="piggyEvents">
+                <div class="box-body no-padding" id="piggyEvents">
                     {% include 'list/piggy-bank-events' %}
                 </div>
             </div>
@@ -105,13 +111,13 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">{{ trans('form.notes') }}</h3>
                     </div>
-                    <div class="box-body markdown">{{ piggy.notes|markdown }}
+                    <div class="box-body markdown">{{ piggy.notes|default('')|markdown }}
                     </div>
                 </div>
 
             </div>
         {% endif %}
-        {% if attachments.count > 0 %}
+        {% if attachments.count() > 0 %}
             <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
                 <div class="box">
                     <div class="box-header with-border">
@@ -119,7 +125,7 @@
                             {{ 'attachments'|_ }}
                         </h3>
                     </div>
-                    <div class="box-body table-responsive no-padding">
+                    <div class="box-body no-padding">
                         {% include 'list.attachments' %}
                     </div>
                 </div>

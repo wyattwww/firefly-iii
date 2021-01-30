@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Muokkaa säästöpossua ":name"',
     'preferences'            => 'Asetukset',
     'profile'                => 'Käyttäjäprofiili',
+    'accounts'               => 'Accounts',
     'changePassword'         => 'Vaihda salasanasi',
     'change_email'           => 'Muuta sähköpostiosoitetta',
     'bills'                  => 'Laskut',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Poista linkki tapahtumien väliltä',
     'telemetry_index'        => 'Käyttötiedot',
     'telemetry_view'         => 'Tarkastele käyttötietoja',
+    'edit_object_group'      => 'Muokkaa ryhmää ":title"',
+    'delete_object_group'    => 'Poista ryhmä ":title"',
+    'logout_others'          => 'Kirjaudu ulos muista istunnoista'
 ];

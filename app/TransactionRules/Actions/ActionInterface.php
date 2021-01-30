@@ -23,7 +23,6 @@ declare(strict_types=1);
 namespace FireflyIII\TransactionRules\Actions;
 
 use FireflyIII\Models\RuleAction;
-use FireflyIII\Models\TransactionJournal;
 
 /**
  * Interface ActionInterface.
@@ -38,11 +37,10 @@ interface ActionInterface
     public function __construct(RuleAction $action);
 
     /**
-     * Execute the action.
+     * Execute the action on an array.
      *
-     * @param TransactionJournal $journal
-     *
+     * @param array $journal
      * @return bool
      */
-    public function act(TransactionJournal $journal): bool;
+    public function actOnArray(array $journal): bool;
 }

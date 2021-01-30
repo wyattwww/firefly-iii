@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace FireflyIII\Api\V1\Controllers;
 
 use FireflyIII\Api\V1\Requests\PiggyBankRequest;
+use FireflyIII\Api\V1\Requests\PiggyBankStoreRequest;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Models\PiggyBank;
 use FireflyIII\Repositories\PiggyBank\PiggyBankRepositoryInterface;
@@ -39,13 +40,10 @@ use League\Fractal\Resource\Item;
 
 /**
  * Class PiggyBankController.
- *
  */
 class PiggyBankController extends Controller
 {
-
-    /** @var PiggyBankRepositoryInterface The piggy bank repository */
-    private $repository;
+    private PiggyBankRepositoryInterface $repository;
 
     /**
      * PiggyBankController constructor.
@@ -111,7 +109,7 @@ class PiggyBankController extends Controller
         $resource = new FractalCollection($attachments, $transformer, 'attachments');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -142,7 +140,7 @@ class PiggyBankController extends Controller
         $resource = new FractalCollection($piggyBanks, $transformer, 'piggy_banks');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -175,7 +173,7 @@ class PiggyBankController extends Controller
         $resource = new FractalCollection($events, $transformer, 'piggy_bank_events');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -197,19 +195,19 @@ class PiggyBankController extends Controller
 
         $resource = new Item($piggyBank, $transformer, 'piggy_banks');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
     /**
      * Store new object.
      *
-     * @param PiggyBankRequest $request
+     * @param PiggyBankStoreRequest $request
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
-    public function store(PiggyBankRequest $request): JsonResponse
+    public function store(PiggyBankStoreRequest $request): JsonResponse
     {
         $piggyBank = $this->repository->store($request->getAll());
         $manager   = $this->getManager();
@@ -220,7 +218,7 @@ class PiggyBankController extends Controller
 
         $resource = new Item($piggyBank, $transformer, 'piggy_banks');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -240,7 +238,6 @@ class PiggyBankController extends Controller
             $this->repository->setCurrentAmount($piggyBank, $data['current_amount']);
         }
 
-
         $manager = $this->getManager();
         /** @var PiggyBankTransformer $transformer */
         $transformer = app(PiggyBankTransformer::class);
@@ -248,7 +245,7 @@ class PiggyBankController extends Controller
 
         $resource = new Item($piggyBank, $transformer, 'piggy_banks');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 }

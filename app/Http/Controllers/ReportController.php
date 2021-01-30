@@ -263,7 +263,7 @@ class ReportController extends Controller
     public function index(AccountRepositoryInterface $repository)
     {
         /** @var Carbon $start */
-        $start            = clone session('first');
+        $start            = clone session('first', today(config('app.timezone')));
         $months           = $this->helper->listOfMonths($start);
         $customFiscalYear = app('preferences')->get('customFiscalYear', 0)->data;
         $accounts         = $repository->getAccountsByType(
@@ -346,7 +346,6 @@ class ReportController extends Controller
         $budgets    = implode(',', $request->getBudgetList()->pluck('id')->toArray());
         $tags       = implode(',', $request->getTagList()->pluck('id')->toArray());
         $double     = implode(',', $request->getDoubleList()->pluck('id')->toArray());
-        $uri        = route('reports.index');
 
         if (0 === $request->getAccountList()->count()) {
             Log::debug('Account count is zero');
@@ -384,11 +383,12 @@ class ReportController extends Controller
         }
 
         switch ($reportType) {
-            case 'category':
-                $uri = route('reports.report.category', [$accounts, $categories, $start, $end]);
-                break;
+            default:
             case 'default':
                 $uri = route('reports.report.default', [$accounts, $start, $end]);
+                break;
+            case 'category':
+                $uri = route('reports.report.category', [$accounts, $categories, $start, $end]);
                 break;
             case 'audit':
                 $uri = route('reports.report.audit', [$accounts, $start, $end]);

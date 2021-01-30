@@ -30,11 +30,15 @@ use FireflyIII\Models\Rule;
 use FireflyIII\Repositories\Rule\RuleRepositoryInterface;
 use FireflyIII\Support\Http\Controllers\RenderPartialViews;
 use FireflyIII\Support\Http\Controllers\RuleManagement;
+use FireflyIII\Support\Search\OperatorQuerySearch;
+use FireflyIII\Support\Search\SearchInterface;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
+use Throwable;
+use Log;
 
 /**
  * Class EditController
@@ -43,8 +47,7 @@ class EditController extends Controller
 {
     use RuleManagement, RenderPartialViews;
 
-    /** @var RuleRepositoryInterface Rule repository */
-    private $ruleRepos;
+    private RuleRepositoryInterface $ruleRepos;
 
     /**
      * RuleController constructor.
@@ -81,15 +84,31 @@ class EditController extends Controller
         $actionCount  = 0;
         $oldActions   = [];
         $oldTriggers  = [];
+
+        // build triggers from query, if present.
+        $query = (string) $request->get('from_query');
+        if ('' !== $query) {
+            $search = app(SearchInterface::class);
+            $search->parseQuery($query);
+            $words     = $search->getWordsAsString();
+            $operators = $search->getOperators()->toArray();
+            if ('' !== $words) {
+                session()->flash('warning', trans('firefly.rule_from_search_words', ['string' => $words]));
+                array_push($operators, ['type' => 'description_contains', 'value' => $words]);
+            }
+            $oldTriggers = $this->parseFromOperators($operators);
+        }
+
+
         // has old input?
         if (count($request->old()) > 0) {
             $oldTriggers  = $this->getPreviousTriggers($request);
-            $triggerCount = count($oldTriggers);
             $oldActions   = $this->getPreviousActions($request);
-            $actionCount  = count($oldActions);
         }
+        $triggerCount = count($oldTriggers);
+        $actionCount  = count($oldActions);
 
-        // overrule old input when it has no rule data:
+        // overrule old input and query data when it has no rule data:
         if (0 === $triggerCount && 0 === $actionCount) {
             $oldTriggers  = $this->getCurrentTriggers($rule);
             $triggerCount = count($oldTriggers);
@@ -145,5 +164,46 @@ class EditController extends Controller
         }
 
         return $redirect;
+    }
+
+    /**
+     * @param array $submittedOperators
+     * @return array
+     */
+    private function parseFromOperators(array $submittedOperators): array
+    {
+        // TODO duplicated code.
+        $operators       = config('firefly.search.operators');
+        $renderedEntries = [];
+        $triggers        = [];
+        foreach ($operators as $key => $operator) {
+            if ('user_action' !== $key && false === $operator['alias']) {
+
+                $triggers[$key] = (string) trans(sprintf('firefly.rule_trigger_%s_choice', $key));
+            }
+        }
+        asort($triggers);
+
+        $index = 0;
+        foreach ($submittedOperators as $operator) {
+            try {
+                $renderedEntries[] = view(
+                    'rules.partials.trigger',
+                    [
+                        'oldTrigger' => OperatorQuerySearch::getRootOperator($operator['type']),
+                        'oldValue'   => $operator['value'],
+                        'oldChecked' => false,
+                        'count'      => $index + 1,
+                        'triggers'   => $triggers,
+                    ]
+                )->render();
+            } catch (Throwable $e) {
+                Log::debug(sprintf('Throwable was thrown in getPreviousTriggers(): %s', $e->getMessage()));
+                Log::error($e->getTraceAsString());
+            }
+            $index++;
+        }
+
+        return $renderedEntries;
     }
 }

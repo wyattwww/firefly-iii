@@ -25,14 +25,17 @@ declare(strict_types=1);
 namespace FireflyIII\Api\V1\Requests;
 
 use FireflyIII\Rules\IsBoolean;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class ConfigurationRequest
  *
  * @codeCoverageIgnore
  */
-class ConfigurationRequest extends Request
+class ConfigurationRequest extends FormRequest
 {
+    use ConvertsDataTypes;
 
     /**
      * Authorize logged in users.
@@ -54,6 +57,8 @@ class ConfigurationRequest extends Request
     {
         $name = $this->route()->parameter('configName');
         switch ($name) {
+            default:
+                break;
             case 'is_demo_site':
             case 'single_user_mode':
                 return ['value' => $this->boolean('value')];
@@ -73,6 +78,8 @@ class ConfigurationRequest extends Request
     {
         $name = $this->route()->parameter('configName');
         switch ($name) {
+            default:
+                break;
             case 'is_demo_site':
             case 'single_user_mode':
                 return ['value' => ['required', new IsBoolean]];

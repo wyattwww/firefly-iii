@@ -24,6 +24,7 @@ namespace FireflyIII\Http\Controllers\Rule;
 
 use FireflyIII\Http\Controllers\Controller;
 use FireflyIII\Models\Rule;
+use FireflyIII\Models\RuleGroup;
 use FireflyIII\Repositories\Rule\RuleRepositoryInterface;
 use FireflyIII\Repositories\RuleGroup\RuleGroupRepositoryInterface;
 use FireflyIII\Support\Http\Controllers\RuleManagement;
@@ -32,7 +33,6 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 
 /**
@@ -41,10 +41,9 @@ use Illuminate\View\View;
 class IndexController extends Controller
 {
     use RuleManagement;
-    /** @var RuleGroupRepositoryInterface Rule group repository */
-    private $ruleGroupRepos;
-    /** @var RuleRepositoryInterface Rule repository. */
-    private $ruleRepos;
+
+    private RuleGroupRepositoryInterface $ruleGroupRepos;
+    private RuleRepositoryInterface      $ruleRepos;
 
     /**
      * RuleController constructor.
@@ -67,20 +66,6 @@ class IndexController extends Controller
     }
 
     /**
-     * Move rule down in list.
-     *
-     * @param Rule $rule
-     *
-     * @return RedirectResponse|Redirector
-     */
-    public function down(Rule $rule)
-    {
-        $this->ruleRepos->moveDown($rule);
-
-        return redirect(route('rules.index'));
-    }
-
-    /**
      * Index of all rules and groups.
      *
      * @return Factory|View
@@ -95,6 +80,20 @@ class IndexController extends Controller
         $ruleGroups = $this->ruleGroupRepos->getRuleGroupsWithRules($user);
 
         return view('rules.index', compact('ruleGroups'));
+    }
+
+    /**
+     * @param Rule $rule
+     * @return RedirectResponse
+     * @throws \FireflyIII\Exceptions\FireflyException
+     */
+    public function search(Rule $rule): RedirectResponse
+    {
+        $route = route('search.index');
+        $query = $this->ruleRepos->getSearchQuery($rule);
+        $route = sprintf('%s?%s', $route, http_build_query(['search' => $query, 'rule' => $rule->id]));
+
+        return redirect($route);
     }
 
     /**
@@ -135,17 +134,18 @@ class IndexController extends Controller
 
 
     /**
-     * Move rule ip.
+     * @param Request   $request
+     * @param Rule      $rule
+     * @param RuleGroup $ruleGroup
      *
-     * @param Rule $rule
-     *
-     * @return RedirectResponse|Redirector
+     * @return JsonResponse
      */
-    public function up(Rule $rule)
+    public function moveRule(Request $request, Rule $rule, RuleGroup $ruleGroup): JsonResponse
     {
-        $this->ruleRepos->moveUp($rule);
+        $order = (int) $request->get('order');
+        $this->ruleRepos->moveRule($rule, $ruleGroup, (int) $order);
 
-        return redirect(route('rules.index'));
+        return response()->json([]);
     }
 
 }

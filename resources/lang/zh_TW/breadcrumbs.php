@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => '編輯小豬撲滿 ":name"',
     'preferences'            => '偏好設定',
     'profile'                => '個人檔案',
+    'accounts'               => 'Accounts',
     'changePassword'         => '更改您的密碼',
     'change_email'           => '更改您的電子郵件地址',
     'bills'                  => '帳單',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => '刪除交易記錄之間的連結',
     'telemetry_index'        => 'Telemetry',
     'telemetry_view'         => 'View telemetry',
+    'edit_object_group'      => 'Edit group ":title"',
+    'delete_object_group'    => 'Delete group ":title"',
+    'logout_others'          => 'Logout other sessions'
 ];

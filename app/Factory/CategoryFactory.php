@@ -35,20 +35,7 @@ use Log;
  */
 class CategoryFactory
 {
-    /** @var User */
-    private $user;
-
-    /**
-     * Constructor.
-     *
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
+    private User $user;
 
     /**
      * @param string $name
@@ -64,13 +51,13 @@ class CategoryFactory
      * @param int|null    $categoryId
      * @param null|string $categoryName
      *
-     * @throws FireflyException
      * @return Category|null
+     * @throws FireflyException
      */
     public function findOrCreate(?int $categoryId, ?string $categoryName): ?Category
     {
-        $categoryId   = (int) $categoryId;
-        $categoryName = (string) $categoryName;
+        $categoryId   = (int)$categoryId;
+        $categoryName = (string)$categoryName;
 
         Log::debug(sprintf('Going to find category with ID %d and name "%s"', $categoryId, $categoryName));
 

@@ -22,21 +22,16 @@ declare(strict_types=1);
 
 namespace FireflyIII\Http\Requests;
 
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Class MassEditBulkJournalRequest.
  */
-class BulkEditJournalRequest extends Request
+class BulkEditJournalRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ConvertsDataTypes, ChecksLogin;
 
     /**
      * Rules for this request.
@@ -48,7 +43,8 @@ class BulkEditJournalRequest extends Request
 
         // fixed
         return [
-            'journals.*' => 'required|belongsToUser:transaction_journals,id',
+            'journals.*'  => 'required|belongsToUser:transaction_journals,id',
+            'tags_action' => 'in:no_nothing,do_replace,do_append',
         ];
     }
 }

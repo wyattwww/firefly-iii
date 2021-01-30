@@ -25,13 +25,21 @@ declare(strict_types=1);
 return [
     // common items
     'greeting'                         => 'Hello,',
-    'closing'                          => 'Bip Boup',
+    'closing'                          => 'Pøuì Poû Põuì,',
     'signature'                        => 'Le Robot de Firefly III',
     'footer_ps'                        => 'PS : Ce message a été envoyé car une requête de l\'adresse IP :ipAddress l\'a déclenché.',
 
     // admin test
     'admin_test_subject'               => 'Un message de test de votre installation de Firefly III',
     'admin_test_body'                  => 'Ceci est un message de test de votre instance Firefly III. Il a été envoyé à :email.',
+
+    // new IP
+    'login_from_new_ip'                => 'Nouvelle connexion sur Firefly III',
+    'new_ip_body'                      => 'Firefly III a détecté une nouvelle connexion sur votre compte à partir d\'une adresse IP inconnue. Si vous ne vous êtes jamais connecté depuis l\'adresse IP ci-dessous, ou si ça fait plus de six mois, Firefly III vous avertira.',
+    'new_ip_warning'                   => 'Si vous reconnaissez cette adresse IP ou la connexion, vous pouvez ignorer ce message. Si vous ne vous êtes pas connecté, si vous n\'avez aucune idée de quoi il s\'agit, vérifiez la sécurité de votre mot de passe, modifiez-la et déconnectez toutes les autres sessions. Pour cela, allez sur votre page de profil. Bien sûr, vous avez déjà activé l\'A2F, n\'est-ce pas ? Soyez prudent !',
+    'ip_address'                       => 'Adresse IP',
+    'host_name'                        => 'Hôte',
+    'date_time'                        => 'Date + heure',
 
     // access token created
     'access_token_created_subject'     => 'Un nouveau jeton d\'accès a été créé',
@@ -44,7 +52,7 @@ return [
     'registered_welcome'               => 'Bienvenue sur <a style="color:#337ab7" href=":address">Firefly III</a>. Votre inscription a été enregistrée, et cet e-mail est là pour le confirmer. Wouhou !',
     'registered_pw'                    => 'Si vous avez déjà oublié votre mot de passe, veuillez le réinitialiser en utilisant <a style="color:#337ab7" href=":address/password/reset">l\'outil de réinitialisation du mot de passe</a>.',
     'registered_help'                  => 'Il y a une icône d\'aide en haut à droite de chaque page. Si vous avez besoin d\'aide, cliquez dessus !',
-    'registered_doc_html'              => 'Si vous ne l\'avez pas déjà fait, veuillez lire la <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/grand-theory">documentation</a>.',
+    'registered_doc_html'              => 'Si vous ne l\'avez pas déjà fait, veuillez lire la <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/personal-finances">documentation</a>.',
     'registered_doc_text'              => 'Si vous ne l\'avez pas déjà fait, veuillez lire le guide de première utilisation.',
     'registered_closing'               => 'À bientôt !',
     'registered_firefly_iii_link'      => 'Firefly III :',
@@ -92,5 +100,5 @@ return [
 
     // report new journals
     'new_journals_subject'             => 'Firefly III a créé une nouvelle opération|Firefly III a créé :count nouvelles opérations',
-    'new_journals_header'              => 'Firefly III a créé une opération pour vous. Vous pouvez la trouver dans votre installation de Firefly III:|Firefly III a créé :count opérations pour vous. Vous pouvez les trouver dans votre installation de Firefly III :',
+    'new_journals_header'              => 'Firefly III a créé une opération pour vous. Vous pouvez la trouver dans votre installation de Firefly III :|Firefly III a créé :count opérations pour vous. Vous pouvez les trouver dans votre installation de Firefly III :',
 ];

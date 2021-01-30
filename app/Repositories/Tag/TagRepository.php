@@ -43,18 +43,7 @@ use Storage;
  */
 class TagRepository implements TagRepositoryInterface
 {
-    /** @var User */
-    private $user;
-
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
+    private User $user;
 
     /**
      * @return int
@@ -167,10 +156,7 @@ class TagRepository implements TagRepositoryInterface
      */
     public function get(): Collection
     {
-        /** @var Collection $tags */
-        $tags = $this->user->tags()->orderBy('tag', 'ASC')->get();
-
-        return $tags;
+        return $this->user->tags()->orderBy('tag', 'ASC')->get();
     }
 
     /**
@@ -287,10 +273,11 @@ class TagRepository implements TagRepositoryInterface
      * Search the users tags.
      *
      * @param string $query
+     * @param int    $limit
      *
      * @return Collection
      */
-    public function searchTags(string $query): Collection
+    public function searchTags(string $query, int $limit): Collection
     {
         /** @var Collection $tags */
         $tags = $this->user->tags()->orderBy('tag', 'ASC');
@@ -299,7 +286,7 @@ class TagRepository implements TagRepositoryInterface
             $tags->where('tag', 'LIKE', $search);
         }
 
-        return $tags->get();
+        return $tags->take($limit)->get('tags.*');
     }
 
     /**
@@ -362,24 +349,54 @@ class TagRepository implements TagRepositoryInterface
         $collector->setTag($tag)->withAccountInformation();
         $journals = $collector->getExtractedJournals();
 
-        $sums = [
-            TransactionType::WITHDRAWAL      => '0',
-            TransactionType::DEPOSIT         => '0',
-            TransactionType::TRANSFER        => '0',
-            TransactionType::RECONCILIATION  => '0',
-            TransactionType::OPENING_BALANCE => '0',
-        ];
+        $sums = [];
 
         /** @var array $journal */
         foreach ($journals as $journal) {
-            $amount = app('steam')->positive((string)$journal['amount']);
+            $currencyId        = (int) $journal['currency_id'];
+            $sums[$currencyId] = $sums[$currencyId] ?? [
+                    'currency_id'                    => $currencyId,
+                    'currency_name'                  => $journal['currency_name'],
+                    'currency_symbol'                => $journal['currency_symbol'],
+                    'currency_decimal_places'        => $journal['currency_decimal_places'],
+                    TransactionType::WITHDRAWAL      => '0',
+                    TransactionType::DEPOSIT         => '0',
+                    TransactionType::TRANSFER        => '0',
+                    TransactionType::RECONCILIATION  => '0',
+                    TransactionType::OPENING_BALANCE => '0',
+                ];
+
+            // add amount to correct type:
+            $amount = app('steam')->positive((string) $journal['amount']);
             $type   = $journal['transaction_type_type'];
             if (TransactionType::WITHDRAWAL === $type) {
                 $amount = bcmul($amount, '-1');
             }
-            $sums[$type] = bcadd($sums[$type], $amount);
-        }
+            $sums[$currencyId][$type] = bcadd($sums[$currencyId][$type], $amount);
 
+            $foreignCurrencyId = $journal['foreign_currency_id'];
+            if (null !== $foreignCurrencyId && 0 !== $foreignCurrencyId) {
+                $sums[$foreignCurrencyId] = $sums[$foreignCurrencyId] ?? [
+                        'currency_id'                    => $foreignCurrencyId,
+                        'currency_name'                  => $journal['foreign_currency_name'],
+                        'currency_symbol'                => $journal['foreign_currency_symbol'],
+                        'currency_decimal_places'        => $journal['foreign_currency_decimal_places'],
+                        TransactionType::WITHDRAWAL      => '0',
+                        TransactionType::DEPOSIT         => '0',
+                        TransactionType::TRANSFER        => '0',
+                        TransactionType::RECONCILIATION  => '0',
+                        TransactionType::OPENING_BALANCE => '0',
+                    ];
+                // add foreign amount to correct type:
+                $amount = app('steam')->positive((string) $journal['foreign_amount']);
+                $type   = $journal['transaction_type_type'];
+                if (TransactionType::WITHDRAWAL === $type) {
+                    $amount = bcmul($amount, '-1');
+                }
+                $sums[$foreignCurrencyId][$type] = bcadd($sums[$foreignCurrencyId][$type], $amount);
+
+            }
+        }
         return $sums;
     }
 
@@ -414,7 +431,7 @@ class TagRepository implements TagRepositoryInterface
         Log::debug(sprintf('Each coin in a tag earns it %s points', $pointsPerCoin));
         /** @var Tag $tag */
         foreach ($tags as $tag) {
-            $amount       = (string)$tag->amount_sum;
+            $amount       = (string) $tag->amount_sum;
             $amount       = '' === $amount ? '0' : $amount;
             $amountMin    = bcsub($amount, $min);
             $pointsForTag = bcmul($amountMin, $pointsPerCoin);
@@ -459,7 +476,6 @@ class TagRepository implements TagRepositoryInterface
      */
     public function update(Tag $tag, array $data): Tag
     {
-        $oldTag           = $data['tag'];
         $tag->tag         = $data['tag'];
         $tag->date        = $data['date'];
         $tag->description = $data['description'];
@@ -506,7 +522,7 @@ class TagRepository implements TagRepositoryInterface
         $max = '0';
         /** @var Tag $tag */
         foreach ($tags as $tag) {
-            $amount = (string)$tag->amount_sum;
+            $amount = (string) $tag->amount_sum;
             $amount = '' === $amount ? '0' : $amount;
             $max    = 1 === bccomp($amount, $max) ? $amount : $max;
 
@@ -528,7 +544,7 @@ class TagRepository implements TagRepositoryInterface
 
         /** @var Tag $tag */
         foreach ($tags as $tag) {
-            $amount = (string)$tag->amount_sum;
+            $amount = (string) $tag->amount_sum;
             $amount = '' === $amount ? '0' : $amount;
 
             if (null === $min) {
@@ -551,11 +567,11 @@ class TagRepository implements TagRepositoryInterface
      */
     public function getAttachments(Tag $tag): Collection
     {
-        $set= $tag->attachments()->get();
+        $set = $tag->attachments()->get();
         /** @var Storage $disk */
         $disk = Storage::disk('upload');
 
-        $set = $set->each(
+        return $set->each(
             static function (Attachment $attachment) use ($disk) {
                 $notes                   = $attachment->notes()->first();
                 $attachment->file_exists = $disk->exists($attachment->fileName());
@@ -564,49 +580,5 @@ class TagRepository implements TagRepositoryInterface
                 return $attachment;
             }
         );
-
-        return $set;
-    }
-
-    /**
-     * @param string $oldName
-     * @param string $newName
-     */
-    private function updateRuleActions(string $oldName, string $newName): void
-    {
-        $types   = ['add_tag', 'remove_tag'];
-        $actions = RuleAction::leftJoin('rules', 'rules.id', '=', 'rule_actions.rule_id')
-                             ->where('rules.user_id', $this->user->id)
-                             ->whereIn('rule_actions.action_type', $types)
-                             ->where('rule_actions.action_value', $oldName)
-                             ->get(['rule_actions.*']);
-        Log::debug(sprintf('Found %d actions to update.', $actions->count()));
-        /** @var RuleAction $action */
-        foreach ($actions as $action) {
-            $action->action_value = $newName;
-            $action->save();
-            Log::debug(sprintf('Updated action %d: %s', $action->id, $action->action_value));
-        }
-    }
-
-    /**
-     * @param string $oldName
-     * @param string $newName
-     */
-    private function updateRuleTriggers(string $oldName, string $newName): void
-    {
-        $types    = ['tag_is',];
-        $triggers = RuleTrigger::leftJoin('rules', 'rules.id', '=', 'rule_triggers.rule_id')
-                               ->where('rules.user_id', $this->user->id)
-                               ->whereIn('rule_triggers.trigger_type', $types)
-                               ->where('rule_triggers.trigger_value', $oldName)
-                               ->get(['rule_triggers.*']);
-        Log::debug(sprintf('Found %d triggers to update.', $triggers->count()));
-        /** @var RuleTrigger $trigger */
-        foreach ($triggers as $trigger) {
-            $trigger->trigger_value = $newName;
-            $trigger->save();
-            Log::debug(sprintf('Updated trigger %d: %s', $trigger->id, $trigger->trigger_value));
-        }
     }
 }

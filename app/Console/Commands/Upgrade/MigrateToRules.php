@@ -63,6 +63,7 @@ class MigrateToRules extends Command
     /** @var UserRepositoryInterface */
     private $userRepository;
 
+
     /**
      * Execute the console command.
      *
@@ -211,7 +212,6 @@ class MigrateToRules extends Command
         $lang       = app('preferences')->getForUser($user, 'language', 'en_US');
         $groupTitle = (string) trans('firefly.rulegroup_for_bills_title', [], $lang->data);
         $ruleGroup  = $this->ruleGroupRepository->findByTitle($groupTitle);
-        //$currency   = $this->getCurrency($user);
 
         if (null === $ruleGroup) {
             $ruleGroup = $this->ruleGroupRepository->store(

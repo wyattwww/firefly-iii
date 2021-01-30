@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /**
  * ReconciliationValidation.php
  * Copyright (c) 2020 james@firefly-iii.org
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Validation\Account;
 
@@ -51,7 +53,7 @@ trait ReconciliationValidation
 
             return false;
         }
-        // $types depends on type of source:
+        // types depends on type of source:
         $types = [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE];
         // if source is reconciliation, destination can't be.
         if (null !== $this->source && AccountType::RECONCILIATION === $this->source->accountType->type) {

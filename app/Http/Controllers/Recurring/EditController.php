@@ -25,6 +25,7 @@ namespace FireflyIII\Http\Controllers\Recurring;
 
 
 use FireflyIII\Exceptions\FireflyException;
+use FireflyIII\Helpers\Attachments\AttachmentHelperInterface;
 use FireflyIII\Http\Controllers\Controller;
 use FireflyIII\Http\Requests\RecurrenceFormRequest;
 use FireflyIII\Models\Recurrence;
@@ -45,10 +46,9 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  */
 class EditController extends Controller
 {
-    /** @var BudgetRepositoryInterface The budget repository */
-    private $budgets;
-    /** @var RecurringRepositoryInterface Recurring repository */
-    private $recurring;
+    private BudgetRepositoryInterface    $budgetRepos;
+    private RecurringRepositoryInterface $recurring;
+    private AttachmentHelperInterface    $attachments;
 
     /**
      * EditController constructor.
@@ -66,9 +66,9 @@ class EditController extends Controller
                 app('view')->share('title', (string) trans('firefly.recurrences'));
                 app('view')->share('subTitle', (string) trans('firefly.recurrences'));
 
-                $this->recurring = app(RecurringRepositoryInterface::class);
-                $this->budgets   = app(BudgetRepositoryInterface::class);
-
+                $this->recurring   = app(RecurringRepositoryInterface::class);
+                $this->budgetRepos = app(BudgetRepositoryInterface::class);
+                $this->attachments = app(AttachmentHelperInterface::class);
                 return $next($request);
             }
         );
@@ -80,9 +80,9 @@ class EditController extends Controller
      * @param Request    $request
      * @param Recurrence $recurrence
      *
+     * @return Factory|View
      * @throws FireflyException
      *
-     * @return Factory|View
      */
     public function edit(Request $request, Recurrence $recurrence)
     {
@@ -91,7 +91,7 @@ class EditController extends Controller
         $transformer->setParameters(new ParameterBag);
 
         $array   = $transformer->transform($recurrence);
-        $budgets = app('expandedform')->makeSelectListWithEmpty($this->budgets->getActiveBudgets());
+        $budgets = app('expandedform')->makeSelectListWithEmpty($this->budgetRepos->getActiveBudgets());
 
         /** @var RecurrenceRepetition $repetition */
         $repetition     = $recurrence->recurrenceRepetitions()->first();
@@ -106,7 +106,7 @@ class EditController extends Controller
         }
         $request->session()->forget('recurrences.edit.fromUpdate');
 
-        $repetitionEnd = 'forever';
+        $repetitionEnd  = 'forever';
         $repetitionEnds = [
             'forever'    => (string) trans('firefly.repeat_forever'),
             'until_date' => (string) trans('firefly.repeat_until_date'),
@@ -127,7 +127,7 @@ class EditController extends Controller
         ];
 
         $hasOldInput = null !== $request->old('_token');
-        $preFilled        = [
+        $preFilled   = [
             'transaction_type'          => strtolower($recurrence->transactionType->type),
             'active'                    => $hasOldInput ? (bool) $request->old('active') : $recurrence->active,
             'apply_rules'               => $hasOldInput ? (bool) $request->old('apply_rules') : $recurrence->apply_rules,
@@ -149,8 +149,8 @@ class EditController extends Controller
      * @param RecurrenceFormRequest $request
      * @param Recurrence            $recurrence
      *
-     * @throws FireflyException
      * @return RedirectResponse|Redirector
+     * @throws FireflyException
      */
     public function update(RecurrenceFormRequest $request, Recurrence $recurrence)
     {
@@ -159,6 +159,21 @@ class EditController extends Controller
         $this->recurring->update($recurrence, $data);
 
         $request->session()->flash('success', (string) trans('firefly.updated_recurrence', ['title' => $recurrence->title]));
+
+        // store new attachment(s):
+        $files = $request->hasFile('attachments') ? $request->file('attachments') : null;
+        if (null !== $files && !auth()->user()->hasRole('demo')) {
+            $this->attachments->saveAttachmentsForModel($recurrence, $files);
+        }
+        if (null !== $files && auth()->user()->hasRole('demo')) {
+            session()->flash('info', (string) trans('firefly.no_att_demo_user'));
+        }
+
+        if (count($this->attachments->getMessages()->get('attachments')) > 0) {
+            $request->session()->flash('info', $this->attachments->getMessages()->get('attachments')); // @codeCoverageIgnore
+        }
+
+
         app('preferences')->mark();
         $redirect = redirect($this->getPreviousUri('recurrences.edit.uri'));
         if (1 === (int) $request->get('return_to_edit')) {

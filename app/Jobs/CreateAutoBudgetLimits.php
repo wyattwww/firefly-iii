@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 /**
  * CreateAutoBudgetLimits.php
- * Copyright (c) 2020 thegrumpydictator@gmail.com
+ * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Jobs;
 
@@ -149,7 +151,7 @@ class CreateAutoBudgetLimits implements ShouldQueue
         $repository = app(OperationsRepositoryInterface::class);
         $repository->setUser($autoBudget->budget->user);
         $spent       = $repository->sumExpenses($previousStart, $previousEnd, null, new Collection([$autoBudget->budget]), $autoBudget->transactionCurrency);
-        $currencyId  = (int) $autoBudget->transaction_currency_id;
+        $currencyId  = (int)$autoBudget->transaction_currency_id;
         $spentAmount = $spent[$currencyId]['sum'] ?? '0';
         Log::debug(sprintf('Spent in previous budget period (%s-%s) is %s', $previousStart->format('Y-m-d'), $previousEnd->format('Y-m-d'), $spentAmount));
 
@@ -198,6 +200,11 @@ class CreateAutoBudgetLimits implements ShouldQueue
      */
     private function handleAutoBudget(AutoBudget $autoBudget): void
     {
+        if (null === $autoBudget->budget) {
+            Log::info(sprintf('Auto budget #%d is associated with a deleted budget.', $autoBudget->id));
+            $autoBudget->delete();
+            return;
+        }
         if (!$this->isMagicDay($autoBudget)) {
             Log::info(
                 sprintf(
@@ -253,8 +260,8 @@ class CreateAutoBudgetLimits implements ShouldQueue
     /**
      * @param AutoBudget $autoBudget
      *
-     * @throws FireflyException
      * @return bool
+     * @throws FireflyException
      */
     private function isMagicDay(AutoBudget $autoBudget): bool
     {

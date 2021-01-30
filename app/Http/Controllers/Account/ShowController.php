@@ -36,7 +36,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Collection;
-use View;
 
 /**
  * Class ShowController
@@ -46,10 +45,8 @@ class ShowController extends Controller
 {
     use UserNavigation, PeriodOverview;
 
-    /** @var CurrencyRepositoryInterface The currency repository */
-    private $currencyRepos;
-    /** @var AccountRepositoryInterface The account repository */
-    private $repository;
+    private CurrencyRepositoryInterface $currencyRepos;
+    private AccountRepositoryInterface $repository;
 
     /**
      * ShowController constructor.
@@ -77,6 +74,7 @@ class ShowController extends Controller
     }
 
 
+
     /**
      * Show an account.
      *
@@ -91,6 +89,8 @@ class ShowController extends Controller
      */
     public function show(Request $request, Account $account, Carbon $start = null, Carbon $end = null)
     {
+        $objectType       = config(sprintf('firefly.shortNamesByFullName.%s', $account->accountType->type));
+
         if (!$this->isEditableAccount($account)) {
             return $this->redirectAccountToAccount($account); // @codeCoverageIgnore
         }
@@ -105,8 +105,7 @@ class ShowController extends Controller
         }
         $location         = $this->repository->getLocation($account);
         $attachments      = $this->repository->getAttachments($account);
-        $objectType       = config(sprintf('firefly.shortNamesByFullName.%s', $account->accountType->type));
-        $today            = new Carbon;
+        $today            = today(config('app.timezone'));
         $subTitleIcon     = config(sprintf('firefly.subIconsByIdentifier.%s', $account->accountType->type));
         $page             = (int) $request->get('page');
         $pageSize         = (int) app('preferences')->get('listPageSize', 50)->data;
@@ -173,8 +172,8 @@ class ShowController extends Controller
         $isLiability  = $this->repository->isLiability($account);
         $attachments      = $this->repository->getAttachments($account);
         $objectType   = config(sprintf('firefly.shortNamesByFullName.%s', $account->accountType->type));
-        $end          = new Carbon;
-        $today        = new Carbon;
+        $end          = today(config('app.timezone'));
+        $today        = today(config('app.timezone'));
         $start        = $this->repository->oldestJournalDate($account) ?? Carbon::now()->startOfMonth();
         $subTitleIcon = config('firefly.subIconsByIdentifier.' . $account->accountType->type);
         $page         = (int) $request->get('page');

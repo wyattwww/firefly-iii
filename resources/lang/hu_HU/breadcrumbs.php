@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => '":name" malacpersely szerkesztése',
     'preferences'            => 'Beállítások',
     'profile'                => 'Profil',
+    'accounts'               => 'Számlák',
     'changePassword'         => 'Jelszó módosítása',
     'change_email'           => 'Email cím módosítása',
     'bills'                  => 'Számlák',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Tranzakciók közötti kapcsolat törlése',
     'telemetry_index'        => 'Telemetria',
     'telemetry_view'         => 'Telemetria megtekintése',
+    'edit_object_group'      => '":title" csoport szerkesztése',
+    'delete_object_group'    => '":title" csoport törlése',
+    'logout_others'          => 'Minden más munkamenet kijelentkeztetése'
 ];

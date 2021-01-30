@@ -29,24 +29,17 @@ use FireflyIII\Repositories\Account\AccountRepositoryInterface;
 use FireflyIII\Repositories\Budget\BudgetRepositoryInterface;
 use FireflyIII\Repositories\Category\CategoryRepositoryInterface;
 use FireflyIII\Repositories\Tag\TagRepositoryInterface;
+use FireflyIII\Support\Request\ChecksLogin;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Collection;
 use Log;
 
 /**
  * Class CategoryFormRequest.
  */
-class ReportFormRequest extends Request
+class ReportFormRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ChecksLogin;
 
     /**
      * Validate list of accounts.
@@ -62,7 +55,7 @@ class ReportFormRequest extends Request
         $collection = new Collection;
         if (is_array($set)) {
             foreach ($set as $accountId) {
-                $account = $repository->findNull((int) $accountId);
+                $account = $repository->findNull((int)$accountId);
                 if (null !== $account) {
                     $collection->push($account);
                 }
@@ -85,7 +78,7 @@ class ReportFormRequest extends Request
         $collection = new Collection;
         if (is_array($set)) {
             foreach ($set as $budgetId) {
-                $budget = $repository->findNull((int) $budgetId);
+                $budget = $repository->findNull((int)$budgetId);
                 if (null !== $budget) {
                     $collection->push($budget);
                 }
@@ -108,7 +101,7 @@ class ReportFormRequest extends Request
         $collection = new Collection;
         if (is_array($set)) {
             foreach ($set as $categoryId) {
-                $category = $repository->findNull((int) $categoryId);
+                $category = $repository->findNull((int)$categoryId);
                 if (null !== $category) {
                     $collection->push($category);
                 }
@@ -131,7 +124,7 @@ class ReportFormRequest extends Request
         $collection = new Collection;
         if (is_array($set)) {
             foreach ($set as $accountId) {
-                $account = $repository->findNull((int) $accountId);
+                $account = $repository->findNull((int)$accountId);
                 if (null !== $account) {
                     $collection->push($account);
                 }
@@ -144,15 +137,15 @@ class ReportFormRequest extends Request
     /**
      * Validate end date.
      *
-     * @throws FireflyException
      * @return Carbon
      *
+     * @throws FireflyException
      */
     public function getEndDate(): Carbon
     {
-        $date  = new Carbon;
+        $date  = today(config('app.timezone'));
         $range = $this->get('daterange');
-        $parts = explode(' - ', (string) $range);
+        $parts = explode(' - ', (string)$range);
         if (2 === count($parts)) {
             try {
                 $date = new Carbon($parts[1]);
@@ -172,15 +165,15 @@ class ReportFormRequest extends Request
     /**
      * Validate start date.
      *
-     * @throws FireflyException
      * @return Carbon
      *
+     * @throws FireflyException
      */
     public function getStartDate(): Carbon
     {
-        $date  = new Carbon;
+        $date  = today(config('app.timezone'));
         $range = $this->get('daterange');
-        $parts = explode(' - ', (string) $range);
+        $parts = explode(' - ', (string)$range);
         if (2 === count($parts)) {
             try {
                 $date = new Carbon($parts[0]);
@@ -216,10 +209,9 @@ class ReportFormRequest extends Request
                     $collection->push($tag);
                     continue;
                 }
-                $tag = $repository->findNull((int) $tagTag);
+                $tag = $repository->findNull((int)$tagTag);
                 if (null !== $tag) {
                     $collection->push($tag);
-                    continue;
                 }
             }
         }

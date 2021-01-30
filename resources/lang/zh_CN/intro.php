@@ -32,32 +32,17 @@ return [
     'index_sidebar-toggle'                            => '若要建立新的交易记录、帐户或其他内容，请使用此图示下的选单。',
     'index_cash_account'                              => '这些是迄今创建的账户。您可以使用现金账户追踪现金支出，但当然不是强制性的。',
 
-    // transactions (withdrawal)
-    'transactions_create_withdrawal_source'           => '从这个下拉选择您最喜欢的资产帐户或负债。',
-    'transactions_create_withdrawal_destination'      => '在此选择一个费用帐户。留空即表示现金支出。',
-    'transactions_create_withdrawal_foreign_currency' => '使用此字段设置外汇和数额。',
-    'transactions_create_withdrawal_more_meta'        => '您在这些字段中设置了很多其它元数据。',
-    'transactions_create_withdrawal_split_add'        => '如果您想要拆分交易，按此按钮添加一笔拆分',
-
-    // transactions (deposit)
-    'transactions_create_deposit_source'              => '在这个自动完成下拉/文本框中选择或输入收款人。如果您想要存入现金，请留空。',
-    'transactions_create_deposit_destination'         => '在此选择一个资产或负债帐户。',
-    'transactions_create_deposit_foreign_currency'    => '使用此字段设置外汇和数额。',
-    'transactions_create_deposit_more_meta'           => '您在这些字段中设置了很多其它元数据。',
-    'transactions_create_deposit_split_add'           => '如果您想要拆分交易，按此按钮添加一笔拆分',
-
-    // transactions (transfer)
-    'transactions_create_transfer_source'             => '在此选择来源资产帐户。',
-    'transactions_create_transfer_destination'        => '在此选择目标资产帐户。',
-    'transactions_create_transfer_foreign_currency'   => '使用此字段设置外汇和数额。',
-    'transactions_create_transfer_more_meta'          => '您在这些字段中设置了很多其它元数据。',
-    'transactions_create_transfer_split_add'          => '如果您想要拆分交易，按此按钮添加一笔拆分',
+    // transactions
+    'transactions_create_basic_info'                  => '输入您交易的基本信息。包括来源帐户、目标帐户、日期和描述。',
+    'transactions_create_amount_info'                 => '在此输入交易金额。 如有必要，这些字段会自动更新以获取外币信息。',
+    'transactions_create_optional_info'               => '这些字段都是可选的。在此处添加数据会使您的交易更有条理。',
+    'transactions_create_split'                       => '如果您想要拆分交易，按此按钮增加一笔拆分',
 
     // create account:
     'accounts_create_iban'                            => '给您的帐户一个有效的 IBAN，可使未来资料导入变得更容易。',
-    'accounts_create_asset_opening_balance'           => '资产帐户可能有一个 "初始馀额"，表示此帐户在 Firefly III 中的纪录开始。',
+    'accounts_create_asset_opening_balance'           => '资产帐户可能有一个 "初始余额"，表示此帐户在 Firefly III 中的纪录开始。',
     'accounts_create_asset_currency'                  => 'Fireflly III 支持多种货币。资产帐户有一种主要货币，您必须在此处设定。',
-    'accounts_create_asset_virtual'                   => '有时，它可以协助赋予你的帐户一个虚拟额度：一个总是增加至实际馀额中，或自其中删减的固定金额。',
+    'accounts_create_asset_virtual'                   => '有时，它可以协助赋予你的帐户一个虚拟额度：一个总是增加至实际余额中，或自其中删减的固定金额。',
 
     // budgets index
     'budgets_index_intro'                             => '预算是用来管理你的财务，也是 Firefly III 的核心功能之一。',

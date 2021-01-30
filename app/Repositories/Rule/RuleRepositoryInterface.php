@@ -40,6 +40,23 @@ interface RuleRepositoryInterface
     public function count(): int;
 
     /**
+     * Return search query for rule.
+     *
+     * @param Rule $rule
+     * @return string
+     */
+    public function getSearchQuery(Rule $rule): string;
+
+    /**
+     * @param Rule      $rule
+     * @param RuleGroup $ruleGroup
+     * @param int       $order
+     *
+     * @return Rule
+     */
+    public function moveRule(Rule $rule, RuleGroup $ruleGroup, int $order): Rule;
+
+    /**
      * @param Rule $rule
      *
      * @return bool
@@ -68,16 +85,23 @@ interface RuleRepositoryInterface
     public function getAll(): Collection;
 
     /**
-     * @return RuleGroup
-     */
-    public function getFirstRuleGroup(): RuleGroup;
-
-    /**
-     * Get the rules for a user tailored to the import process.
+     * Get all the users rules that trigger on storage.
      *
      * @return Collection
      */
-    public function getForImport(): Collection;
+    public function getStoreRules(): Collection;
+
+    /**
+     * Get all the users rules that trigger on update.
+     *
+     * @return Collection
+     */
+    public function getUpdateRules(): Collection;
+
+    /**
+     * @return RuleGroup
+     */
+    public function getFirstRuleGroup(): RuleGroup;
 
     /**
      * @param RuleGroup $ruleGroup

@@ -42,16 +42,17 @@ use League\Fractal\Resource\Item;
 
 /**
  * Class LinkTypeController.
- *
  */
 class LinkTypeController extends Controller
 {
     use TransactionFilter;
+
     /** @var LinkTypeRepositoryInterface The link type repository */
     private $repository;
 
     /** @var UserRepositoryInterface The user repository */
     private $userRepository;
+
 
     /**
      * LinkTypeController constructor.
@@ -79,9 +80,9 @@ class LinkTypeController extends Controller
      *
      * @param LinkType $linkType
      *
+     * @return JsonResponse
      * @throws FireflyException
      * @codeCoverageIgnore
-     * @return JsonResponse
      */
     public function delete(LinkType $linkType): JsonResponse
     {
@@ -121,7 +122,7 @@ class LinkTypeController extends Controller
         $resource = new FractalCollection($linkTypes, $transformer, 'link_types');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -142,7 +143,7 @@ class LinkTypeController extends Controller
 
         $resource = new Item($linkType, $transformer, 'link_types');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -151,8 +152,8 @@ class LinkTypeController extends Controller
      *
      * @param LinkTypeRequest $request
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
     public function store(LinkTypeRequest $request): JsonResponse
     {
@@ -172,7 +173,7 @@ class LinkTypeController extends Controller
         $transformer->setParameters($this->parameters);
         $resource = new Item($linkType, $transformer, 'link_types');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -231,7 +232,7 @@ class LinkTypeController extends Controller
         $resource = new FractalCollection($transactions, $transformer, 'transactions');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
 
@@ -241,8 +242,8 @@ class LinkTypeController extends Controller
      * @param LinkTypeRequest $request
      * @param LinkType        $linkType
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
     public function update(LinkTypeRequest $request, LinkType $linkType): JsonResponse
     {
@@ -266,7 +267,7 @@ class LinkTypeController extends Controller
 
         $resource = new Item($linkType, $transformer, 'link_types');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 }

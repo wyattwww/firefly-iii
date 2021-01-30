@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Editar hucha ":name"',
     'preferences'            => 'Preferencias',
     'profile'                => 'Perfil',
+    'accounts'               => 'Cuentas',
     'changePassword'         => 'Cambiar contraseña',
     'change_email'           => 'Cambiar su dirección de correo electrónico',
     'bills'                  => 'Facturas',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Eliminar enlace entre transacciones',
     'telemetry_index'        => 'Telemetría',
     'telemetry_view'         => 'Ver telemetría',
+    'edit_object_group'      => 'Editar grupo ":title"',
+    'delete_object_group'    => 'Eliminar grupo ":title"',
+    'logout_others'          => 'Desconectar otras sesiones'
 ];

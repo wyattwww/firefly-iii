@@ -33,6 +33,14 @@ return [
     'admin_test_subject'               => 'Un mesaj de testare de la instalarea Firefly III',
     'admin_test_body'                  => 'Acesta este un mesaj de test de la instanța dvs. Firefly III. Acesta a fost trimis la :email.',
 
+    // new IP
+    'login_from_new_ip'                => 'New login on Firefly III',
+    'new_ip_body'                      => 'Firefly III detected a new login on your account from an unknown IP address. If you never logged in from the IP address below, or it has been more than six months ago, Firefly III will warn you.',
+    'new_ip_warning'                   => 'If you recognize this IP address or the login, you can ignore this message. If you didn\'t login, of if you have no idea what this is about, verify your password security, change it, and log out all other sessions. To do this, go to your profile page. Of course you have 2FA enabled already, right? Stay safe!',
+    'ip_address'                       => 'IP address',
+    'host_name'                        => 'Host',
+    'date_time'                        => 'Date + time',
+
     // access token created
     'access_token_created_subject'     => 'Un nou token de acces a fost creat',
     'access_token_created_body'        => 'Cineva (sperăm că dvs.) tocmai a creat un nou Firefly III API Access Token pentru contul dvs. de utilizator.',
@@ -44,7 +52,7 @@ return [
     'registered_welcome'               => 'Bine ați venit la <a style="color:#337ab7" href=":address">Firefly III</a>. Înregistrarea dvs. s-a făcut, iar acest e-mail este aici pentru a-l confirma. Yay!',
     'registered_pw'                    => 'Dacă v-ați uitat deja parola, vă rugăm să o resetați folosind <a style="color:#337ab7" href=":address/password/reset">unealta de resetare a parolei</a>.',
     'registered_help'                  => 'Există o pictogramă de ajutor în colțul din dreapta sus al fiecărei pagini. Dacă ai nevoie de ajutor, apasă pe ea!',
-    'registered_doc_html'              => 'Dacă nu ați citit deja, vă rugăm sa cititi<a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/grand-theory">documentatia</a>.',
+    'registered_doc_html'              => 'If you haven\'t already, please read the <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/personal-finances">grand theory</a>.',
     'registered_doc_text'              => 'Dacă nu ați facut-o deja, va rugam citit ghidul de utilizare și descrierea completă.',
     'registered_closing'               => 'Bucurați-vă de el!',
     'registered_firefly_iii_link'      => 'Firefly III:',

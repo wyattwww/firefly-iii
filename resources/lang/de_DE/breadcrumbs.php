@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Sparschwein „:name” bearbeiten',
     'preferences'            => 'Einstellungen',
     'profile'                => 'Profil',
+    'accounts'               => 'Konten',
     'changePassword'         => 'Passwort ändern',
     'change_email'           => 'E-Mail Adresse ändern',
     'bills'                  => 'Rechnungen',
@@ -39,8 +40,8 @@ return [
     'reports'                => 'Berichte',
     'search_result'          => 'Suchergebnisse für ":query"',
     'withdrawal_list'        => 'Ausgaben',
-    'Withdrawal_list'        => 'Aufwendungen',
-    'deposit_list'           => 'Umsatz, Einkommen und Einzahlungen',
+    'Withdrawal_list'        => 'Ausgaben',
+    'deposit_list'           => 'Einnahmen, Einkommen und Einzahlungen',
     'transfer_list'          => 'Umbuchungen',
     'transfers_list'         => 'Umbuchungen',
     'reconciliation_list'    => 'Kontenabgleiche',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Transaktionsverknüpfung löschen',
     'telemetry_index'        => 'Telemetrie',
     'telemetry_view'         => 'Telemetrie anzeigen',
+    'edit_object_group'      => 'Gruppe „:title” bearbeiten',
+    'delete_object_group'    => 'Gruppe „:title” löschen',
+    'logout_others'          => 'Alle anderen Sitzungen abmelden'
 ];

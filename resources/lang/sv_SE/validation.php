@@ -57,7 +57,6 @@ return [
     'at_least_one_action'            => 'Regel måste ha minst en åtgärd.',
     'base64'                         => 'Detta är inte giltigt bas64 data.',
     'model_id_invalid'               => 'Angivet ID verkar ogiltig för denna modell.',
-    'more'                           => ':attribute must be larger than ":more".',
     'less'                           => ':attribute måste vara mindre än 10 000 000',
     'active_url'                     => ':attribute är inte en giltig URL.',
     'after'                          => ':attribute måste vara ett datum efter :date.',
@@ -130,6 +129,7 @@ return [
     'amount_zero'                    => 'Totala värdet kan inte vara noll.',
     'current_target_amount'          => 'Det nuvarande beloppet måste vara mindre än målbeloppet.',
     'unique_piggy_bank_for_user'     => 'Namnet på spargrisen måste vara unikt.',
+    'unique_object_group'            => 'Gruppnamnet måste vara unikt',
 
     'secure_password'                => 'Detta lösenord är inte säkert. Vänligen försök igen. För mer info se https://bit.ly/FF3-password-security',
     'valid_recurrence_rep_type'      => 'Ogiltig repetitionstyp får återkommande transaktioner.',
@@ -197,12 +197,13 @@ return [
     'generic_invalid_source'      => 'Det går inte att använda detta konto som källkonto.',
     'generic_invalid_destination' => 'Det går inte att använda detta konto som mottagarkonto.',
 
-    'gte.numeric' => 'The :attribute must be greater than or equal to :value.',
-    'gte.file'    => 'The :attribute must be greater than or equal to :value kilobytes.',
-    'gte.string'  => 'The :attribute must be greater than or equal to :value characters.',
-    'gte.array'   => 'The :attribute must have :value items or more.',
+    'gte.numeric' => ':attribute måste vara större än eller lika med :value.',
+    'gt.numeric'  => ':attribute måste vara större än :value.',
+    'gte.file'    => ':attribute måste vara större än eller lika med :value kilobyte.',
+    'gte.string'  => ':attribute måste vara större än eller lika med :value tecken.',
+    'gte.array'   => ':attribute måste ha :value objekt eller mer.',
 
-    'amount_required_for_auto_budget' => 'The amount is required.',
-    'auto_budget_amount_positive'     => 'The amount must be more than zero.',
-    'auto_budget_period_mandatory' => 'The auto budget period is a mandatory field.',
+    'amount_required_for_auto_budget' => 'Beloppet är obligatoriskt.',
+    'auto_budget_amount_positive'     => 'Beloppet måste vara mer än noll.',
+    'auto_budget_period_mandatory' => 'Den automatiska budgetperioden är ett obligatoriskt fält.',
 ];

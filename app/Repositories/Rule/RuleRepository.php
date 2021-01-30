@@ -27,6 +27,7 @@ use FireflyIII\Models\Rule;
 use FireflyIII\Models\RuleAction;
 use FireflyIII\Models\RuleGroup;
 use FireflyIII\Models\RuleTrigger;
+use FireflyIII\Support\Search\OperatorQuerySearch;
 use FireflyIII\User;
 use Illuminate\Support\Collection;
 use Log;
@@ -113,33 +114,13 @@ class RuleRepository implements RuleRepositoryInterface
     }
 
     /**
-     * Get the rules for a user tailored to the import process.
-     *
-     * @return Collection
-     */
-    public function getForImport(): Collection
-    {
-        return Rule::distinct()
-                   ->where('rules.user_id', $this->user->id)
-                   ->leftJoin('rule_groups', 'rule_groups.id', '=', 'rules.rule_group_id')
-                   ->leftJoin('rule_triggers', 'rules.id', '=', 'rule_triggers.rule_id')
-                   ->where('rule_groups.active', 1)
-                   ->where('rule_triggers.trigger_type', 'user_action')
-                   ->where('rule_triggers.trigger_value', 'store-journal')
-                   ->where('rules.active', 1)
-                   ->orderBy('rule_groups.order', 'ASC')
-                   ->orderBy('rules.order', 'ASC')
-                   ->get(['rules.*', 'rule_groups.order']);
-    }
-
-    /**
      * @param RuleGroup $ruleGroup
      *
      * @return int
      */
     public function getHighestOrderInRuleGroup(RuleGroup $ruleGroup): int
     {
-        return (int)$ruleGroup->rules()->max('order');
+        return (int) $ruleGroup->rules()->max('order');
     }
 
     /**
@@ -432,6 +413,7 @@ class RuleRepository implements RuleRepositoryInterface
                 'stop_processing' => $stopProcessing,
                 'order'           => $order,
             ];
+            app('telemetry')->feature('rules.actions.uses_action', $action['type']);
 
             $this->storeAction($rule, $actionValues);
         }
@@ -468,6 +450,7 @@ class RuleRepository implements RuleRepositoryInterface
                 'stop_processing' => $stopProcessing,
                 'order'           => $order,
             ];
+            app('telemetry')->feature('rules.triggers.uses_trigger', $trigger['type']);
 
             $this->storeTrigger($rule, $triggerValues);
             ++$order;
@@ -481,8 +464,8 @@ class RuleRepository implements RuleRepositoryInterface
      */
     public function duplicate(Rule $rule): Rule
     {
-        $newRule = $rule->replicate();
-        $newRule->title = (string)trans('firefly.rule_copy_of', ['title' => $rule->title]);
+        $newRule        = $rule->replicate();
+        $newRule->title = (string) trans('firefly.rule_copy_of', ['title' => $rule->title]);
         $newRule->save();
 
         // replicate all triggers
@@ -502,5 +485,94 @@ class RuleRepository implements RuleRepositoryInterface
         }
 
         return $newRule;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function moveRule(Rule $rule, RuleGroup $ruleGroup, int $order): Rule
+    {
+        $rule->order = $order;
+        if ($rule->rule_group_id !== $ruleGroup->id) {
+            $rule->rule_group_id = $ruleGroup->id;
+        }
+        $rule->save();
+
+        return $rule;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getStoreRules(): Collection
+    {
+        $collection = $this->user->rules()
+                                 ->leftJoin('rule_groups', 'rule_groups.id', '=', 'rules.rule_group_id')
+                                 ->where('rules.active', 1)
+                                 ->where('rule_groups.active', 1)
+                                 ->orderBy('rule_groups.order', 'ASC')
+                                 ->orderBy('rules.order', 'ASC')
+                                 ->orderBy('rules.id', 'ASC')
+                                 ->with(['ruleGroup', 'ruleTriggers'])->get(['rules.*']);
+        $filtered   = new Collection;
+        /** @var Rule $rule */
+        foreach ($collection as $rule) {
+            /** @var RuleTrigger $ruleTrigger */
+            foreach ($rule->ruleTriggers as $ruleTrigger) {
+                if ('user_action' === $ruleTrigger->trigger_type && 'store-journal' === $ruleTrigger->trigger_value) {
+                    $filtered->push($rule);
+                }
+            }
+        }
+        return $filtered;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getUpdateRules(): Collection
+    {
+        $collection = $this->user->rules()
+                                 ->leftJoin('rule_groups', 'rule_groups.id', '=', 'rules.rule_group_id')
+                                 ->where('rules.active', 1)
+                                 ->where('rule_groups.active', 1)
+                                 ->orderBy('rule_groups.order', 'ASC')
+                                 ->orderBy('rules.order', 'ASC')
+                                 ->orderBy('rules.id', 'ASC')
+                                 ->with(['ruleGroup', 'ruleTriggers'])->get();
+        $filtered   = new Collection;
+        /** @var Rule $rule */
+        foreach ($collection as $rule) {
+            /** @var RuleTrigger $ruleTrigger */
+            foreach ($rule->ruleTriggers as $ruleTrigger) {
+                if ('user_action' === $ruleTrigger->trigger_type && 'update-journal' === $ruleTrigger->trigger_value) {
+                    $filtered->push($rule);
+                }
+            }
+        }
+        return $filtered;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSearchQuery(Rule $rule): string
+    {
+        $params = [];
+        /** @var RuleTrigger $trigger */
+        foreach ($rule->ruleTriggers as $trigger) {
+            if ('user_action' === $trigger->trigger_type) {
+                continue;
+            }
+            $needsContext = config(sprintf('firefly.search.operators.%s.needs_context', $trigger->trigger_type)) ?? true;
+            if (false === $needsContext) {
+                $params[] = sprintf('%s:true', OperatorQuerySearch::getRootOperator($trigger->trigger_type));
+            }
+            if (true === $needsContext) {
+                $params[] = sprintf('%s:"%s"', OperatorQuerySearch::getRootOperator($trigger->trigger_type), $trigger->trigger_value);
+            }
+        }
+        return implode(' ', $params);
+
     }
 }

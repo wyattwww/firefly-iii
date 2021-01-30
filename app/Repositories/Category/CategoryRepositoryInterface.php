@@ -33,6 +33,27 @@ use Illuminate\Support\Collection;
  */
 interface CategoryRepositoryInterface
 {
+
+    /**
+     * Remove notes.
+     *
+     * @param Category $category
+     */
+    public function removeNotes(Category $category): void;
+
+    /**
+     * @param Category $category
+     * @param string   $notes
+     */
+    public function updateNotes(Category $category, string $notes): void;
+
+    /**
+     * @param Category $category
+     *
+     * @return string|null
+     */
+    public function getNoteText(Category $category): ?string;
+
     /**
      * Delete all categories.
      */
@@ -113,10 +134,11 @@ interface CategoryRepositoryInterface
 
     /**
      * @param string $query
+     * @param int $limit
      *
      * @return Collection
      */
-    public function searchCategory(string $query): Collection;
+    public function searchCategory(string $query, int $limit): Collection;
 
     /**
      * @param User $user

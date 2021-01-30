@@ -98,9 +98,7 @@ trait RequestInformation
             // also check cache first:
             if ($help->inCache($route, $language)) {
                 Log::debug(sprintf('Help text %s was in cache.', $language));
-                $content = $help->getFromCache($route, $language);
-
-                return $content;
+                return $help->getFromCache($route, $language);
             }
             $baseHref   = route('index');
             $helpString = sprintf(
@@ -131,7 +129,7 @@ trait RequestInformation
         $triggers = [];
         $data     = $request->get('triggers');
         if (is_array($data)) {
-            foreach ($data as $index => $triggerInfo) {
+            foreach ($data as $triggerInfo) {
                 $triggers[] = [
                     'type'            => $triggerInfo['type'] ?? '',
                     'value'           => $triggerInfo['value'] ?? '',
@@ -166,7 +164,6 @@ trait RequestInformation
         // both must be array and either must be > 0
         if (count($intro) > 0 || count($specialIntro) > 0) {
             $shownDemo = app('preferences')->get($key, false)->data;
-            //Log::debug(sprintf('Check if user has already seen intro with key "%s". Result is %s', $key, var_export($shownDemo, true)));
         }
         if (!is_bool($shownDemo)) {
             $shownDemo = true; // @codeCoverageIgnore

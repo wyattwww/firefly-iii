@@ -33,6 +33,14 @@ return [
     'admin_test_subject'               => 'Un mensaje de prueba de su instalación de Firefly III',
     'admin_test_body'                  => 'Este es un mensaje de prueba de tu instancia de Firefly III. Fue enviado a :email.',
 
+    // new IP
+    'login_from_new_ip'                => 'Nuevo inicio de sesión en Firefly III',
+    'new_ip_body'                      => 'Firefly III detectó un nuevo inicio de sesión en su cuenta desde una dirección IP desconocida. Si nunca ha iniciado sesión desde la dirección IP de abajo, o fué hace más de seis meses, Firefly III le avisará.',
+    'new_ip_warning'                   => 'Si reconoce esta dirección IP o el inicio de sesión, puede ignorar este mensaje. Si no ha iniciado sesión, o sí no tiene idea de qué es esto, verifique la seguridad de su contraseña, cámbiela y cierre todas las demás sesiones. Para hacer esto, valla a su página de perfil. Por supuesto que ya tiene A2F habilitado, ¿verdad? ¡Manténgase seguro!',
+    'ip_address'                       => 'Dirección IP',
+    'host_name'                        => 'Servidor',
+    'date_time'                        => 'Fecha + hora',
+
     // access token created
     'access_token_created_subject'     => 'Se ha creado un nuevo token de acceso',
     'access_token_created_body'        => 'Alguien (esperemos que usted) acaba de crear un nuevo token de acceso a la API de Firefly III para tu cuenta de usuario.',
@@ -44,7 +52,7 @@ return [
     'registered_welcome'               => 'Bienvenido a <a style="color:#337ab7" href=":address">Firefly III</a>. Se ha hecho su registro, y este correo electrónico está aquí para confirmarlo. ¡Si!',
     'registered_pw'                    => 'Si ya ha olvidado su contraseña, por favor restáurela usando <a style="color:#337ab7" href=":address/password/reset">la herramienta de restablecimiento de contraseña</a>.',
     'registered_help'                  => 'Hay un icono de ayuda en la esquina superior derecha de cada página. Si necesita ayuda, ¡Haga clic en él!',
-    'registered_doc_html'              => 'Si aún no lo ha hecho, por favor lea la <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/grand-theory">gran teoría</a>.',
+    'registered_doc_html'              => 'If you haven\'t already, please read the <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/personal-finances">grand theory</a>.',
     'registered_doc_text'              => 'Si aún no lo ha hecho, por favor lea la primera guía de uso y la descripción completa.',
     'registered_closing'               => '¡Disfrute!',
     'registered_firefly_iii_link'      => 'Firefly III:',

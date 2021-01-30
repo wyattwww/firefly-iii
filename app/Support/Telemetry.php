@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 /**
  * Telemetry.php
- * Copyright (c) 2020 thegrumpydictator@gmail.com
+ * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -20,10 +20,11 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace FireflyIII\Support;
 
 use Carbon\Carbon;
-use Exception;
 use FireflyIII\Models\Telemetry as TelemetryModel;
 use FireflyIII\Support\System\GeneratesInstallationId;
 use Illuminate\Database\QueryException;
@@ -45,7 +46,6 @@ class Telemetry
      * - execute-cli-command [value]
      * - use-help-pages
      * - has-created-bill
-     * - do-big-import
      * - first-time-install
      * - more
      *
@@ -134,7 +134,8 @@ class Telemetry
                 ->where('key', $key)
                 ->where('value', $jsonEncoded)
                 ->count();
-        } catch (QueryException|Exception $e) {
+        } catch (QueryException $e) {
+            Log::info(sprintf('Could not execute hasEntry() but this is OK: %s', $e->getMessage()));
             $count = 0;
         }
 
@@ -187,8 +188,8 @@ class Telemetry
                     'value'           => $value,
                 ]
             );
-        } catch (QueryException|Exception $e) {
-            // ignore.
+        } catch (QueryException $e) {
+            Log::info(sprintf('Could not execute storeEntry() but this is OK: %s', $e->getMessage()));
         }
     }
 }

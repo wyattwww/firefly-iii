@@ -23,22 +23,16 @@ declare(strict_types=1);
 namespace FireflyIII\Http\Requests;
 
 use FireflyIII\Models\TransactionCurrency;
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class CurrencyFormRequest.
  */
-class CurrencyFormRequest extends Request
+class CurrencyFormRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ConvertsDataTypes, ChecksLogin;
 
     /**
      * Returns the data required by the controller.

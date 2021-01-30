@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Rediger sparegris ":name"',
     'preferences'            => 'Innstillinger',
     'profile'                => 'Profil',
+    'accounts'               => 'Accounts',
     'changePassword'         => 'Endre passord',
     'change_email'           => 'Endre din epostadresse',
     'bills'                  => 'Regninger',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Slett kobling mellom transaksjoner',
     'telemetry_index'        => 'Telemetry',
     'telemetry_view'         => 'View telemetry',
+    'edit_object_group'      => 'Edit group ":title"',
+    'delete_object_group'    => 'Delete group ":title"',
+    'logout_others'          => 'Logout other sessions'
 ];

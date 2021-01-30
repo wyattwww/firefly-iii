@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Modifier la tirelire ":name"',
     'preferences'            => 'Préférences',
     'profile'                => 'Profil',
+    'accounts'               => 'Comptes',
     'changePassword'         => 'Modifier le mot de passe',
     'change_email'           => 'Changer votre adresse e-mail',
     'bills'                  => 'Factures',
@@ -44,7 +45,7 @@ return [
     'transfer_list'          => 'Virements',
     'transfers_list'         => 'Virements',
     'reconciliation_list'    => 'Rapprochements',
-    'create_withdrawal'      => 'Créer un nouveau retrait',
+    'create_withdrawal'      => 'Créer une nouvelle dépense',
     'create_deposit'         => 'Créer un nouveau versement',
     'create_transfer'        => 'Créer un nouveau virement',
     'create_new_transaction' => 'Créer une nouvelle opération',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Supprimer le lien entre les opérations',
     'telemetry_index'        => 'Télémétrie',
     'telemetry_view'         => 'Voir la télémétrie',
+    'edit_object_group'      => 'Modifier le groupe ":title"',
+    'delete_object_group'    => 'Supprimer le groupe ":title"',
+    'logout_others'          => 'Déconnecter d\'autres sessions'
 ];

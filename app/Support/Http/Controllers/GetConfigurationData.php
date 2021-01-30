@@ -51,9 +51,7 @@ trait GetConfigurationData
             E_ALL & ~E_NOTICE & ~E_STRICT                                  => 'E_ALL & ~E_NOTICE & ~E_STRICT',
             E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
         ];
-        $result = $array[$value] ?? (string)$value;
-
-        return $result;
+        return $array[$value] ?? (string)$value;
     }
 
     /**
@@ -101,17 +99,14 @@ trait GetConfigurationData
         $first    = session('first');
         $title    = sprintf('%s - %s', $start->formatLocalized($this->monthAndDayFormat), $end->formatLocalized($this->monthAndDayFormat));
         $isCustom = true === session('is_custom_range', false);
-        $today    = new Carbon;
+        $today    = today(config('app.timezone'));
         $ranges   = [
             // first range is the current range:
             $title => [$start, $end],
         ];
-        //Log::debug(sprintf('viewRange is %s', $viewRange));
-        //Log::debug(sprintf('isCustom is %s', var_export($isCustom, true)));
 
         // when current range is a custom range, add the current period as the next range.
         if ($isCustom) {
-            //Log::debug('Custom is true.');
             $index             = app('navigation')->periodShow($start, $viewRange);
             $customPeriodStart = app('navigation')->startOfPeriod($start, $viewRange);
             $customPeriodEnd   = app('navigation')->endOfPeriod($customPeriodStart, $viewRange);
@@ -153,7 +148,7 @@ trait GetConfigurationData
         $index          = (string)trans('firefly.everything');
         $ranges[$index] = [$first, new Carbon];
 
-        $return = [
+        return [
             'title'         => $title,
             'configuration' => [
                 'apply'       => (string)trans('firefly.apply'),
@@ -166,8 +161,6 @@ trait GetConfigurationData
                 'ranges'      => $ranges,
             ],
         ];
-
-        return $return;
     }
 
     /**

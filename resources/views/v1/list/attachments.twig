@@ -1,4 +1,4 @@
-<table class="table table-hover">
+<table class="table table-responsive table-hover">
     {% for attachment in attachments %}
         <tr>
             <td style="width:120px;">
@@ -28,7 +28,7 @@
                     </a>
                     ({{ attachment.size|filesize }})
                     {% if null != attachment.notes  and '' != attachment.notes %}
-                        {{ attachment.notes|markdown }}
+                        {{ attachment.notes|default('')|markdown }}
                     {% endif %}
                 {% endif %}
                 {% if not attachment.file_exists %}

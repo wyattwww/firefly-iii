@@ -28,7 +28,6 @@ use FireflyIII\Events\UserChangedEmail;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Exceptions\ValidationException;
 use FireflyIII\Http\Middleware\IsDemoUser;
-use FireflyIII\Http\Middleware\IsSandStormUser;
 use FireflyIII\Http\Requests\DeleteAccountFormRequest;
 use FireflyIII\Http\Requests\EmailFormRequest;
 use FireflyIII\Http\Requests\ProfileFormRequest;
@@ -61,6 +60,9 @@ class ProfileController extends Controller
 {
     use RequestInformation, CreateStuff;
 
+    protected bool $internalAuth;
+    protected bool $internalIdentity;
+
     /**
      * ProfileController constructor.
      *
@@ -78,9 +80,52 @@ class ProfileController extends Controller
                 return $next($request);
             }
         );
+        $loginProvider          = config('firefly.login_provider');
+        $authGuard              = config('firefly.authentication_guard');
+        $this->internalAuth     = 'web' === $authGuard;
+        $this->internalIdentity = 'eloquent' === $loginProvider;
+        Log::debug(sprintf('ProfileController::__construct(). Login provider is "%s", authentication guard is "%s"', $loginProvider, $authGuard));
 
         $this->middleware(IsDemoUser::class)->except(['index']);
-        $this->middleware(IsSandStormUser::class)->except('index');
+    }
+
+    /**
+     *
+     */
+    public function logoutOtherSessions()
+    {
+        if (!$this->internalAuth) {
+            session()->flash('info', (string) trans('firefly.external_auth_disabled'));
+            return redirect(route('profile.index'));
+        }
+        return view('profile.logout-other-sessions');
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return \Illuminate\Contracts\Foundation\Application|RedirectResponse|Redirector
+     */
+    public function postLogoutOtherSessions(Request $request)
+    {
+        if (!$this->internalAuth) {
+            session()->flash('info', (string) trans('firefly.external_auth_disabled'));
+            return redirect(route('profile.index'));
+        }
+        $creds = [
+            'email'    => auth()->user()->email,
+            'password' => $request->get('password'),
+        ];
+        if (Auth::once($creds)) {
+            Auth::logoutOtherDevices($request->get('password'));
+            session()->flash('info', (string) trans('firefly.other_sessions_logged_out'));
+
+            return redirect(route('profile.index'));
+        }
+        session()->flash('error', (string) trans('auth.failed'));
+
+        return redirect(route('profile.index'));
+
     }
 
     /**
@@ -92,13 +137,10 @@ class ProfileController extends Controller
      */
     public function changeEmail(Request $request)
     {
-        $loginProvider = config('firefly.login_provider');
-        if ('eloquent' !== $loginProvider) {
-            // @codeCoverageIgnoreStart
-            $request->session()->flash('error', trans('firefly.login_provider_local_only', ['login_provider' => e($loginProvider)]));
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
 
             return redirect(route('profile.index'));
-            // @codeCoverageIgnoreEnd
         }
 
         $title        = auth()->user()->email;
@@ -118,13 +160,10 @@ class ProfileController extends Controller
      */
     public function changePassword(Request $request)
     {
-        $loginProvider = config('firefly.login_provider');
-        if ('eloquent' !== $loginProvider) {
-            // @codeCoverageIgnoreStart
-            $request->session()->flash('error', trans('firefly.login_provider_local_only', ['login_provider' => e($loginProvider)]));
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
 
             return redirect(route('profile.index'));
-            // @codeCoverageIgnoreEnd
         }
 
         $title        = auth()->user()->email;
@@ -137,10 +176,17 @@ class ProfileController extends Controller
     /**
      * View that generates a 2FA code for the user.
      *
+     * @param Request $request
+     *
      * @return Factory|View
      */
-    public function code()
+    public function code(Request $request)
     {
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
+        }
         $domain = $this->getDomain();
         $secret = null;
 
@@ -186,36 +232,31 @@ class ProfileController extends Controller
      * @param UserRepositoryInterface $repository
      * @param string                  $token
      *
-     * @throws FireflyException
      * @return RedirectResponse|Redirector
      *
+     * @throws FireflyException
      */
     public function confirmEmailChange(UserRepositoryInterface $repository, string $token)
     {
-        $loginProvider = config('firefly.login_provider');
-        if ('eloquent' !== $loginProvider) {
+        if (!$this->internalAuth || !$this->internalIdentity) {
             // @codeCoverageIgnoreStart
-            throw new FireflyException('Cannot confirm email change when authentication provider is not local.');
+            throw new FireflyException(trans('firefly.external_user_mgt_disabled'));
             // @codeCoverageIgnoreEnd
         }
         // find preference with this token value.
         /** @var Collection $set */
         $set  = app('preferences')->findByName('email_change_confirm_token');
         $user = null;
-        //Log::debug(sprintf('Found %d preferences', $set->count()));
         /** @var Preference $preference */
         foreach ($set as $preference) {
             if ($preference->data === $token) {
-                //Log::debug('Found user');
                 $user = $preference->user;
             }
         }
         // update user to clear blocked and blocked_code.
         if (null === $user) {
-            //Log::debug('Found no user');
             throw new FireflyException('Invalid token.');
         }
-        //Log::debug('Will unblock user.');
         $repository->unblockUser($user);
 
         // return to login.
@@ -229,15 +270,14 @@ class ProfileController extends Controller
      *
      * @param Request $request
      *
-     * @return Factory|View
+     * @return \Illuminate\Contracts\Foundation\Application|RedirectResponse|Redirector
      */
     public function deleteAccount(Request $request)
     {
-        $loginProvider = config('firefly.login_provider');
-        if ('eloquent' !== $loginProvider) {
-            // @codeCoverageIgnoreStart
-            $request->session()->flash('warning', trans('firefly.delete_local_info_only', ['login_provider' => e($loginProvider)]));
-            // @codeCoverageIgnoreEnd
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
         }
         $title        = auth()->user()->email;
         $subTitle     = (string) trans('firefly.delete_account');
@@ -251,8 +291,13 @@ class ProfileController extends Controller
      *
      * @return RedirectResponse|Redirector
      */
-    public function deleteCode()
+    public function deleteCode(Request $request)
     {
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
+        }
         /** @var UserRepositoryInterface $repository */
         $repository = app(UserRepositoryInterface::class);
 
@@ -271,8 +316,14 @@ class ProfileController extends Controller
      *
      * @return RedirectResponse|Redirector
      */
-    public function enable2FA()
+    public function enable2FA(Request $request)
     {
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
+        }
+
         /** @var User $user */
         $user       = auth()->user();
         $enabledMFA = null !== $user->mfa_secret;
@@ -297,11 +348,14 @@ class ProfileController extends Controller
     public function index()
     {
         /** @var User $user */
-        $user          = auth()->user();
-        $loginProvider = config('firefly.login_provider');
-        // check if client token thing exists (default one)
-        $count = DB::table('oauth_clients')->where('personal_access_client', 1)->whereNull('user_id')->count();
-
+        $user               = auth()->user();
+        $isInternalAuth     = $this->internalAuth;
+        $isInternalIdentity = $this->internalIdentity;
+        $count              = DB::table('oauth_clients')->where('personal_access_client', 1)->whereNull('user_id')->count();
+        $subTitle           = $user->email;
+        $userId             = $user->id;
+        $enabled2FA         = null !== $user->mfa_secret;
+        $mfaBackupCount     = count(app('preferences')->get('mfa_recovery', [])->data);
         $this->createOAuthKeys();
 
         if (0 === $count) {
@@ -309,32 +363,33 @@ class ProfileController extends Controller
             $repository = app(ClientRepository::class);
             $repository->createPersonalAccessClient(null, config('app.name') . ' Personal Access Client', 'http://localhost');
         }
-        $subTitle       = $user->email;
-        $userId         = $user->id;
-        $enabled2FA     = null !== $user->mfa_secret;
-        $mfaBackupCount = count(app('preferences')->get('mfa_recovery', [])->data);
 
-        // get access token or create one.
         $accessToken = app('preferences')->get('access_token', null);
         if (null === $accessToken) {
             $token       = $user->generateAccessToken();
             $accessToken = app('preferences')->set('access_token', $token);
         }
 
-        return view('profile.index', compact('subTitle', 'mfaBackupCount', 'userId', 'accessToken', 'enabled2FA', 'loginProvider'));
+        return view('profile.index', compact('subTitle', 'mfaBackupCount', 'userId', 'accessToken', 'enabled2FA', 'isInternalAuth','isInternalIdentity'));
     }
 
     /**
      * @return Factory|View
      */
-    public function newBackupCodes()
+    public function newBackupCodes(Request $request)
     {
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
+        }
+
         // generate recovery codes:
         $recovery      = app(Recovery::class);
         $recoveryCodes = $recovery->lowercase()
                                   ->setCount(8)     // Generate 8 codes
                                   ->setBlocks(2)    // Every code must have 7 blocks
-                                  ->setChars(6)    // Each block must have 16 chars
+                                  ->setChars(6)     // Each block must have 16 chars
                                   ->toArray();
         $codes         = implode("\r\n", $recoveryCodes);
 
@@ -354,13 +409,10 @@ class ProfileController extends Controller
      */
     public function postChangeEmail(EmailFormRequest $request, UserRepositoryInterface $repository)
     {
-        $loginProvider = config('firefly.login_provider');
-        if ('eloquent' !== $loginProvider) {
-            // @codeCoverageIgnoreStart
-            $request->session()->flash('error', trans('firefly.login_provider_local_only', ['login_provider' => e($loginProvider)]));
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
 
             return redirect(route('profile.index'));
-            // @codeCoverageIgnoreEnd
         }
 
         /** @var User $user */
@@ -408,13 +460,10 @@ class ProfileController extends Controller
      */
     public function postChangePassword(ProfileFormRequest $request, UserRepositoryInterface $repository)
     {
-        $loginProvider = config('firefly.login_provider');
-        if ('eloquent' !== $loginProvider) {
-            // @codeCoverageIgnoreStart
-            $request->session()->flash('error', trans('firefly.login_provider_local_only', ['login_provider' => e($loginProvider)]));
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
 
             return redirect(route('profile.index'));
-            // @codeCoverageIgnoreEnd
         }
 
         // the request has already validated both new passwords must be equal.
@@ -446,6 +495,12 @@ class ProfileController extends Controller
      */
     public function postCode(TokenFormRequest $request)
     {
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
+        }
+
         /** @var User $user */
         $user = auth()->user();
         /** @var UserRepositoryInterface $repository */
@@ -485,6 +540,12 @@ class ProfileController extends Controller
      */
     public function postDeleteAccount(UserRepositoryInterface $repository, DeleteAccountFormRequest $request)
     {
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
+        }
+
         if (!Hash::check($request->get('password'), auth()->user()->password)) {
             session()->flash('error', (string) trans('firefly.invalid_password'));
 
@@ -506,8 +567,14 @@ class ProfileController extends Controller
      *
      * @return RedirectResponse|Redirector
      */
-    public function regenerate()
+    public function regenerate(Request $request)
     {
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            $request->session()->flash('error', trans('firefly.external_user_mgt_disabled'));
+
+            return redirect(route('profile.index'));
+        }
+
         /** @var User $user */
         $user  = auth()->user();
         $token = $user->generateAccessToken();
@@ -524,17 +591,14 @@ class ProfileController extends Controller
      * @param string                  $token
      * @param string                  $hash
      *
-     * @throws FireflyException
      * @return RedirectResponse|Redirector
      *
+     * @throws FireflyException
      */
     public function undoEmailChange(UserRepositoryInterface $repository, string $token, string $hash)
     {
-        $loginProvider = config('firefly.login_provider');
-        if ('eloquent' !== $loginProvider) {
-            // @codeCoverageIgnoreStart
-            throw new FireflyException('Cannot confirm email change when authentication provider is not local.');
-            // @codeCoverageIgnoreEnd
+        if (!$this->internalAuth || !$this->internalIdentity) {
+            throw new FireflyException(trans('firefly.external_user_mgt_disabled'));
         }
 
         // find preference with this token value.

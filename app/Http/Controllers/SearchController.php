@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace FireflyIII\Http\Controllers;
 
+use FireflyIII\Repositories\Rule\RuleRepositoryInterface;
 use FireflyIII\Support\Search\SearchInterface;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
@@ -62,15 +63,36 @@ class SearchController extends Controller
      */
     public function index(Request $request, SearchInterface $searcher)
     {
-        $fullQuery = (string) $request->get('search');
-        $page      = 0 === (int) $request->get('page') ? 1 : (int) $request->get('page');
+        // search params:
+        $fullQuery        = (string) $request->get('search');
+        $page             = 0 === (int) $request->get('page') ? 1 : (int) $request->get('page');
+        $ruleId           = (int) $request->get('rule');
+        $rule             = null;
+        $ruleChanged      = false;
+        $longQueryWarning = false;
+
+        // find rule, check if query is different, offer to update.
+        $ruleRepository = app(RuleRepositoryInterface::class);
+        $rule           = $ruleRepository->find($ruleId);
+        if (null !== $rule) {
+            $originalQuery = $ruleRepository->getSearchQuery($rule);
+            if ($originalQuery !== $fullQuery) {
+                $ruleChanged = true;
+            }
+        }
+        if (strlen($fullQuery) > 250) {
+            $longQueryWarning = true;
+        }
         // parse search terms:
         $searcher->parseQuery($fullQuery);
-        $query     = $searcher->getWordsAsString();
-        $modifiers = $searcher->getModifiers();
-        $subTitle  = (string) trans('breadcrumbs.search_result', ['query' => $query]);
 
-        return view('search.index', compact('query', 'modifiers', 'page', 'fullQuery', 'subTitle'));
+        // words from query and operators:
+        $query     = $searcher->getWordsAsString();
+        $operators = $searcher->getOperators();
+
+        $subTitle = (string) trans('breadcrumbs.search_result', ['query' => $fullQuery]);
+
+        return view('search.index', compact('query', 'longQueryWarning', 'operators', 'page', 'rule', 'fullQuery', 'subTitle', 'ruleId', 'ruleChanged'));
     }
 
     /**
@@ -87,14 +109,15 @@ class SearchController extends Controller
         $page      = 0 === (int) $request->get('page') ? 1 : (int) $request->get('page');
 
         $searcher->parseQuery($fullQuery);
+
         $searcher->setPage($page);
-        $searcher->setLimit((int) config('firefly.search_result_limit'));
         $groups     = $searcher->searchTransactions();
         $hasPages   = $groups->hasPages();
         $searchTime = round($searcher->searchTime(), 3); // in seconds
         $parameters = ['search' => $fullQuery];
         $url        = route('search.index') . '?' . http_build_query($parameters);
         $groups->setPath($url);
+
         try {
             $html = view('search.search', compact('groups', 'hasPages', 'searchTime'))->render();
             // @codeCoverageIgnoreStart

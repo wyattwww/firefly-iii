@@ -29,8 +29,8 @@ use FireflyIII\Models\Bill;
 use FireflyIII\Models\Budget;
 use FireflyIII\Models\BudgetLimit;
 use FireflyIII\Models\Category;
-use FireflyIII\Models\ImportJob;
 use FireflyIII\Models\LinkType;
+use FireflyIII\Models\ObjectGroup;
 use FireflyIII\Models\PiggyBank;
 use FireflyIII\Models\Recurrence;
 use FireflyIII\Models\Rule;
@@ -114,8 +114,8 @@ try {
             if (null !== $start && null !== $end) {
                 $title = trans(
                     'firefly.between_dates_breadcrumb',
-                    ['start' => $start ? $start->formatLocalized((string) trans('config.month_and_day')) : '',
-                     'end'   => $end ? $end->formatLocalized((string) trans('config.month_and_day')) : '',]
+                    ['start' =>$start->formatLocalized((string) trans('config.month_and_day')),
+                     'end'   => $end->formatLocalized((string) trans('config.month_and_day')),]
                 );
                 $breadcrumbs->push($title, route('accounts.show', $account));
             }
@@ -645,39 +645,6 @@ try {
         }
     );
 
-    // IMPORT
-    Breadcrumbs::register(
-        'import.index',
-        static function (BreadcrumbsGenerator $breadcrumbs) {
-            $breadcrumbs->parent('home');
-            $breadcrumbs->push(trans('firefly.import_index_title'), route('import.index'));
-        }
-    );
-
-    Breadcrumbs::register(
-        'import.prerequisites.index',
-        static function (BreadcrumbsGenerator $breadcrumbs, string $importProvider) {
-            $breadcrumbs->parent('import.index');
-            $breadcrumbs->push(trans('import.prerequisites_breadcrumb_' . $importProvider), route('import.prerequisites.index', [$importProvider]));
-        }
-    );
-
-    Breadcrumbs::register(
-        'import.job.configuration.index',
-        static function (BreadcrumbsGenerator $breadcrumbs, ImportJob $job) {
-            $breadcrumbs->parent('import.index');
-            $breadcrumbs->push(trans('import.job_configuration_breadcrumb', ['key' => $job->key]), route('import.job.configuration.index', [$job->key]));
-        }
-    );
-
-    Breadcrumbs::register(
-        'import.job.status.index',
-        static function (BreadcrumbsGenerator $breadcrumbs, ImportJob $job) {
-            $breadcrumbs->parent('import.index');
-            $breadcrumbs->push(trans('import.job_status_breadcrumb', ['key' => $job->key]), route('import.job.status.index', [$job->key]));
-        }
-    );
-
     // PREFERENCES
     Breadcrumbs::register(
         'preferences.index',
@@ -700,6 +667,14 @@ try {
         static function (BreadcrumbsGenerator $breadcrumbs) {
             $breadcrumbs->parent('home');
             $breadcrumbs->push(trans('breadcrumbs.profile'), route('profile.index'));
+        }
+    );
+
+    Breadcrumbs::register(
+        'profile.logout-others',
+        static function (BreadcrumbsGenerator $breadcrumbs) {
+            $breadcrumbs->parent('home');
+            $breadcrumbs->push(trans('breadcrumbs.logout_others'), route('profile.logout-others'));
         }
     );
 
@@ -870,6 +845,14 @@ try {
 
     Breadcrumbs::register(
         'recurring.create',
+        static function (BreadcrumbsGenerator $breadcrumbs) {
+            $breadcrumbs->parent('recurring.index');
+            $breadcrumbs->push(trans('firefly.create_new_recurrence'), route('recurring.create'));
+        }
+    );
+
+    Breadcrumbs::register(
+        'recurring.create-from-journal',
         static function (BreadcrumbsGenerator $breadcrumbs) {
             $breadcrumbs->parent('recurring.index');
             $breadcrumbs->push(trans('firefly.create_new_recurrence'), route('recurring.create'));
@@ -1160,7 +1143,7 @@ try {
     Breadcrumbs::register(
         'transactions.mass.edit',
         static function (BreadcrumbsGenerator $breadcrumbs, array $journals): void {
-            if (count($journals) > 0) {
+            if (!empty($journals)) {
                 $objectType = strtolower(reset($journals)['transaction_type_type']);
                 $breadcrumbs->parent('transactions.index', $objectType);
                 $breadcrumbs->push(trans('firefly.mass_edit_journals'), route('transactions.mass.edit', ['']));
@@ -1184,7 +1167,7 @@ try {
     Breadcrumbs::register(
         'transactions.bulk.edit',
         static function (BreadcrumbsGenerator $breadcrumbs, array $journals): void {
-            if (count($journals) > 0) {
+            if (!empty($journals)) {
                 $ids = Arr::pluck($journals, 'transaction_journal_id');
                 $first = reset($journals);
                 $breadcrumbs->parent('transactions.index', strtolower($first['transaction_type_type']));
@@ -1197,13 +1180,31 @@ try {
         }
     );
 
-    // SPLIT
+    // object groups
     Breadcrumbs::register(
-        'transactions.split.edit',
-        static function (BreadcrumbsGenerator $breadcrumbs, TransactionJournal $journal) {
-            $breadcrumbs->parent('transactions.show', $journal);
-            $breadcrumbs->push(trans('breadcrumbs.edit_journal', ['description' => $journal->description]), route('transactions.split.edit', [$journal->id]));
+        'object-groups.index',
+        static function (BreadcrumbsGenerator $breadcrumbs): void {
+            $breadcrumbs->parent('index');
+            $breadcrumbs->push(trans('firefly.object_groups_breadcrumb'), route('object-groups.index'));
         }
     );
+
+    Breadcrumbs::register(
+        'object-groups.edit',
+        static function (BreadcrumbsGenerator $breadcrumbs, ObjectGroup $objectGroup) {
+            $breadcrumbs->parent('object-groups.index');
+            $breadcrumbs->push(trans('breadcrumbs.edit_object_group', ['title' => $objectGroup->title]), route('object-groups.edit', [$objectGroup->id]));
+        }
+    );
+
+    Breadcrumbs::register(
+        'object-groups.delete',
+        static function (BreadcrumbsGenerator $breadcrumbs, ObjectGroup $objectGroup) {
+            $breadcrumbs->parent('object-groups.index');
+            $breadcrumbs->push(trans('breadcrumbs.delete_object_group', ['title' => $objectGroup->title]), route('object-groups.delete', [$objectGroup->id]));
+        }
+    );
+
 } catch (DuplicateBreadcrumbException $e) {
+    // @ignoreException
 }

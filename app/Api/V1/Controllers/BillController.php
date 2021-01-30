@@ -24,7 +24,8 @@ declare(strict_types=1);
 
 namespace FireflyIII\Api\V1\Controllers;
 
-use FireflyIII\Api\V1\Requests\BillRequest;
+use FireflyIII\Api\V1\Requests\BillUpdateRequest;
+use FireflyIII\Api\V1\Requests\BillStoreRequest;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Helpers\Collector\GroupCollectorInterface;
 use FireflyIII\Models\Bill;
@@ -44,13 +45,13 @@ use League\Fractal\Resource\Item;
 
 /**
  * Class BillController.
- *
  */
 class BillController extends Controller
 {
     use TransactionFilter;
-    /** @var BillRepositoryInterface The bill repository */
-    private $repository;
+
+    private BillRepositoryInterface $repository;
+
 
     /**
      * BillController constructor.
@@ -102,7 +103,7 @@ class BillController extends Controller
         $resource = new FractalCollection($attachments, $transformer, 'attachments');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -142,7 +143,7 @@ class BillController extends Controller
         $resource = new FractalCollection($bills, $transformer, 'bills');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -177,7 +178,7 @@ class BillController extends Controller
         $resource = new FractalCollection($rules, $transformer, 'rules');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -198,18 +199,18 @@ class BillController extends Controller
 
         $resource = new Item($bill, $transformer, 'bills');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
      * Store a bill.
      *
-     * @param BillRequest $request
+     * @param BillStoreRequest $request
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
-    public function store(BillRequest $request): JsonResponse
+    public function store(BillStoreRequest $request): JsonResponse
     {
         $bill    = $this->repository->store($request->getAll());
         $manager = $this->getManager();
@@ -220,7 +221,7 @@ class BillController extends Controller
 
         $resource = new Item($bill, $transformer, 'bills');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -278,18 +279,18 @@ class BillController extends Controller
         $resource = new FractalCollection($transactions, $transformer, 'transactions');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
      * Update a bill.
      *
-     * @param BillRequest $request
+     * @param BillUpdateRequest $request
      * @param Bill        $bill
      *
      * @return JsonResponse
      */
-    public function update(BillRequest $request, Bill $bill): JsonResponse
+    public function update(BillUpdateRequest $request, Bill $bill): JsonResponse
     {
         $data    = $request->getAll();
         $bill    = $this->repository->update($bill, $data);
@@ -301,7 +302,7 @@ class BillController extends Controller
 
         $resource = new Item($bill, $transformer, 'bills');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 }

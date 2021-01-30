@@ -47,18 +47,7 @@ use Log;
  */
 class CurrencyRepository implements CurrencyRepositoryInterface
 {
-    /** @var User */
-    private $user;
-
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
+    private User $user;
 
     /**
      * @param TransactionCurrency $currency
@@ -69,10 +58,7 @@ class CurrencyRepository implements CurrencyRepositoryInterface
     {
         $count = $currency->transactions()->whereNull('deleted_at')->count() + $currency->transactionJournals()->whereNull('deleted_at')->count();
         // also count foreign:
-        $count += Transaction::where('foreign_currency_id', $currency->id)->count();
-
-        return $count;
-
+        return $count + Transaction::where('foreign_currency_id', $currency->id)->count();
     }
 
     /**
@@ -170,14 +156,6 @@ class CurrencyRepository implements CurrencyRepositoryInterface
             return 'current_default';
         }
 
-        //        // is the default currency for the system
-        //        $defaultSystemCode = config('firefly.default_currency', 'EUR');
-        //        $result            = $currency->code === $defaultSystemCode;
-        //        if (true === $result) {
-        //            Log::info('Is the default currency of the SYSTEM, return true.');
-        //
-        //            return 'system_fallback';
-        //        }
         Log::debug('Currency is not used, return false.');
 
         return null;
@@ -424,14 +402,6 @@ class CurrencyRepository implements CurrencyRepositoryInterface
     }
 
     /**
-     * @return Collection
-     */
-    public function getEnabled(): Collection
-    {
-        return TransactionCurrency::where('enabled', true)->orderBy('code', 'ASC')->get();
-    }
-
-    /**
      * Get currency exchange rate.
      *
      * @param TransactionCurrency $fromCurrency
@@ -484,17 +454,18 @@ class CurrencyRepository implements CurrencyRepositoryInterface
 
     /**
      * @param string $search
+     * @param int $limit
      *
      * @return Collection
      */
-    public function searchCurrency(string $search): Collection
+    public function searchCurrency(string $search, int $limit): Collection
     {
         $query = TransactionCurrency::where('enabled', 1);
         if ('' !== $search) {
             $query->where('name', 'LIKE', sprintf('%%%s%%', $search));
         }
 
-        return $query->get();
+        return $query->take($limit)->get();
     }
 
     /**

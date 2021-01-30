@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 /**
  * UpdateRequestInterface.php
- * Copyright (c) 2019 james@firefly-iii.org
+ * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -20,9 +20,9 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace FireflyIII\Services\FireflyIIIOrg\Update;
+declare(strict_types=1);
 
-use FireflyIII\Exceptions\FireflyException;
+namespace FireflyIII\Services\FireflyIIIOrg\Update;
 
 /**
  * Interface UpdateRequestInterface

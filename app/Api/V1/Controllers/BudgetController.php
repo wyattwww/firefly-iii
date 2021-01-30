@@ -23,8 +23,6 @@ declare(strict_types=1);
 
 namespace FireflyIII\Api\V1\Controllers;
 
-use Exception;
-use FireflyIII\Api\V1\Requests\BudgetLimitRequest;
 use FireflyIII\Api\V1\Requests\BudgetStoreRequest;
 use FireflyIII\Api\V1\Requests\BudgetUpdateRequest;
 use FireflyIII\Exceptions\FireflyException;
@@ -47,15 +45,17 @@ use League\Fractal\Resource\Item;
 
 /**
  * Class BudgetController.
- *
  */
 class BudgetController extends Controller
 {
     use TransactionFilter;
+
     /** @var BudgetLimitRepositoryInterface */
     private $blRepository;
+
     /** @var BudgetRepositoryInterface The budget repository */
     private $repository;
+
 
     /**
      * BudgetController constructor.
@@ -107,7 +107,7 @@ class BudgetController extends Controller
         $resource = new FractalCollection($budgetLimits, $transformer, 'budget_limits');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -136,7 +136,7 @@ class BudgetController extends Controller
         $resource = new FractalCollection($attachments, $transformer, 'attachments');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -183,7 +183,7 @@ class BudgetController extends Controller
         $resource = new FractalCollection($budgets, $transformer, 'budgets');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -204,7 +204,7 @@ class BudgetController extends Controller
 
         $resource = new Item($budget, $transformer, 'budgets');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -212,9 +212,9 @@ class BudgetController extends Controller
      *
      * @param BudgetStoreRequest $request
      *
+     * @return JsonResponse
      * @throws FireflyException
      *
-     * @return JsonResponse
      */
     public function store(BudgetStoreRequest $request): JsonResponse
     {
@@ -227,32 +227,7 @@ class BudgetController extends Controller
 
         $resource = new Item($budget, $transformer, 'budgets');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param BudgetLimitRequest $request
-     * @param Budget             $budget
-     *
-     * @throws Exception
-     * @return JsonResponse
-     */
-    public function storeBudgetLimit(BudgetLimitRequest $request, Budget $budget): JsonResponse
-    {
-        $data           = $request->getAll();
-        $data['budget'] = $budget;
-        $budgetLimit    = $this->blRepository->storeBudgetLimit($data);
-        $manager        = $this->getManager();
-
-        /** @var BudgetLimitTransformer $transformer */
-        $transformer = app(BudgetLimitTransformer::class);
-        $transformer->setParameters($this->parameters);
-
-        $resource = new Item($budgetLimit, $transformer, 'budget_limits');
-
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -316,7 +291,7 @@ class BudgetController extends Controller
         $resource = new FractalCollection($transactions, $transformer, 'transactions');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -339,7 +314,7 @@ class BudgetController extends Controller
 
         $resource = new Item($budget, $transformer, 'budgets');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 

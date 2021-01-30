@@ -27,6 +27,7 @@ namespace FireflyIII\Factory;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Models\Bill;
 use FireflyIII\Models\TransactionCurrency;
+use FireflyIII\Repositories\ObjectGroup\CreatesObjectGroups;
 use FireflyIII\Services\Internal\Support\BillServiceTrait;
 use FireflyIII\User;
 use Illuminate\Database\QueryException;
@@ -37,35 +38,22 @@ use Log;
  */
 class BillFactory
 {
-    use BillServiceTrait;
+    use BillServiceTrait, CreatesObjectGroups;
 
-    /** @var User */
-    private $user;
-
-    /**
-     * Constructor.
-     *
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
+    private User $user;
 
     /**
      * @param array $data
      *
-     * @throws FireflyException
      * @return Bill|null
+     * @throws FireflyException
      */
     public function create(array $data): ?Bill
     {
         /** @var TransactionCurrencyFactory $factory */
         $factory = app(TransactionCurrencyFactory::class);
         /** @var TransactionCurrency $currency */
-        $currency = $factory->find((int) ($data['currency_id'] ?? null), (string) ($data['currency_code'] ?? null));
+        $currency = $factory->find((int)($data['currency_id'] ?? null), (string)($data['currency_code'] ?? null));
 
         if (null === $currency) {
             $currency = app('amount')->getDefaultCurrencyByUser($this->user);
@@ -93,8 +81,26 @@ class BillFactory
             throw new FireflyException('400000: Could not store bill.');
         }
 
-        if (isset($data['notes'])) {
-            $this->updateNote($bill, $data['notes']);
+        if (array_key_exists('notes', $data)) {
+            $this->updateNote($bill, (string)$data['notes']);
+        }
+
+        $objectGroupTitle = $data['object_group'] ?? '';
+        if ('' !== $objectGroupTitle) {
+            $objectGroup = $this->findOrCreateObjectGroup($objectGroupTitle);
+            if (null !== $objectGroup) {
+                $bill->objectGroups()->sync([$objectGroup->id]);
+                $bill->save();
+            }
+        }
+        // try also with ID:
+        $objectGroupId = (int)($data['object_group_id'] ?? 0);
+        if (0 !== $objectGroupId) {
+            $objectGroup = $this->findObjectGroupById($objectGroupId);
+            if (null !== $objectGroup) {
+                $bill->objectGroups()->sync([$objectGroup->id]);
+                $bill->save();
+            }
         }
 
         return $bill;
@@ -108,8 +114,8 @@ class BillFactory
      */
     public function find(?int $billId, ?string $billName): ?Bill
     {
-        $billId   = (int) $billId;
-        $billName = (string) $billName;
+        $billId   = (int)$billId;
+        $billName = (string)$billName;
         $bill     = null;
         // first find by ID:
         if ($billId > 0) {
@@ -133,11 +139,7 @@ class BillFactory
      */
     public function findByName(string $name): ?Bill
     {
-        $query = sprintf('%%%s%%', $name);
-        /** @var Bill $first */
-        $first = $this->user->bills()->where('name', 'LIKE', $query)->first();
-
-        return $first;
+        return $this->user->bills()->where('name', 'LIKE', sprintf('%%%s%%', $name))->first();
     }
 
     /**

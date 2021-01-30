@@ -40,6 +40,7 @@ use FireflyIII\Support\Http\Api\TransactionFilter;
 use FireflyIII\Transformers\AttachmentTransformer;
 use FireflyIII\Transformers\PiggyBankEventTransformer;
 use FireflyIII\Transformers\TransactionGroupTransformer;
+use FireflyIII\Transformers\TransactionLinkTransformer;
 use FireflyIII\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -57,12 +58,10 @@ class TransactionController extends Controller
 {
     use TransactionFilter;
 
-    /** @var TransactionGroupRepositoryInterface Group repository. */
-    private $groupRepository;
-    /** @var JournalAPIRepositoryInterface Journal API repos */
-    private $journalAPIRepository;
-    /** @var JournalRepositoryInterface The journal repository */
-    private $repository;
+    private TransactionGroupRepositoryInterface $groupRepository;
+    private JournalAPIRepositoryInterface       $journalAPIRepository;
+    private JournalRepositoryInterface          $repository;
+
 
     /**
      * TransactionController constructor.
@@ -109,7 +108,27 @@ class TransactionController extends Controller
 
         $resource = new FractalCollection($attachments, $transformer, 'attachments');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
+    }
+
+    /**
+     * @param TransactionJournal $transactionJournal
+     *
+     * @return JsonResponse
+     * @codeCoverageIgnore
+     */
+    public function transactionLinks(TransactionJournal $transactionJournal): JsonResponse
+    {
+        $manager      = $this->getManager();
+        $journalLinks = $this->journalAPIRepository->getJournalLinks($transactionJournal);
+
+        /** @var TransactionLinkTransformer $transformer */
+        $transformer = app(TransactionLinkTransformer::class);
+        $transformer->setParameters($this->parameters);
+
+        $resource = new FractalCollection($journalLinks, $transformer, 'transaction_links');
+
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -190,7 +209,7 @@ class TransactionController extends Controller
         $resource = new FractalCollection($transactions, $transformer, 'transactions');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -213,7 +232,20 @@ class TransactionController extends Controller
 
         $resource = new FractalCollection($events, $transformer, 'piggy_bank_events');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
+    }
+
+    /**
+     * Show a single transaction, by transaction journal.
+     *
+     * @param TransactionJournal $transactionJournal
+     *
+     * @return JsonResponse
+     * @codeCoverageIgnore
+     */
+    public function showByJournal(TransactionJournal $transactionJournal): JsonResponse
+    {
+        return $this->show($transactionJournal->transactionGroup);
     }
 
     /**
@@ -248,20 +280,7 @@ class TransactionController extends Controller
         $transformer->setParameters($this->parameters);
         $resource = new Item($selectedGroup, $transformer, 'transactions');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
-    }
-
-    /**
-     * Show a single transaction, by transaction journal.
-     *
-     * @param TransactionJournal $transactionJournal
-     *
-     * @return JsonResponse
-     * @codeCoverageIgnore
-     */
-    public function showByJournal(TransactionJournal $transactionJournal): JsonResponse
-    {
-        return $this->show($transactionJournal->transactionGroup);
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -269,8 +288,8 @@ class TransactionController extends Controller
      *
      * @param TransactionStoreRequest $request
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
     public function store(TransactionStoreRequest $request): JsonResponse
     {
@@ -334,7 +353,7 @@ class TransactionController extends Controller
         $transformer->setParameters($this->parameters);
         $resource = new Item($selectedGroup, $transformer, 'transactions');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
 
@@ -377,6 +396,6 @@ class TransactionController extends Controller
         $transformer->setParameters($this->parameters);
         $resource = new Item($selectedGroup, $transformer, 'transactions');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 }

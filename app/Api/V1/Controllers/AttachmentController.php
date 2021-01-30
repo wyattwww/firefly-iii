@@ -28,7 +28,6 @@ use FireflyIII\Api\V1\Requests\AttachmentStoreRequest;
 use FireflyIII\Api\V1\Requests\AttachmentUpdateRequest;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Helpers\Attachments\AttachmentHelperInterface;
-use FireflyIII\Http\Middleware\IsDemoUser;
 use FireflyIII\Models\Attachment;
 use FireflyIII\Repositories\Attachment\AttachmentRepositoryInterface;
 use FireflyIII\Transformers\AttachmentTransformer;
@@ -45,12 +44,12 @@ use function strlen;
 
 /**
  * Class AttachmentController.
- *
  */
 class AttachmentController extends Controller
 {
     /** @var AttachmentRepositoryInterface The attachment repository */
     private $repository;
+
 
     /**
      * AccountController constructor.
@@ -96,8 +95,8 @@ class AttachmentController extends Controller
      * @param Attachment $attachment
      *
      * @codeCoverageIgnore
-     * @throws   FireflyException
      * @return LaravelResponse
+     * @throws   FireflyException
      */
     public function download(Attachment $attachment): LaravelResponse
     {
@@ -161,7 +160,7 @@ class AttachmentController extends Controller
         $resource = new FractalCollection($attachments, $transformer, 'attachments');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -180,7 +179,7 @@ class AttachmentController extends Controller
 
         $resource = new Item($attachment, $transformer, 'attachments');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -188,8 +187,8 @@ class AttachmentController extends Controller
      *
      * @param AttachmentStoreRequest $request
      *
-     * @throws FireflyException
      * @return JsonResponse
+     * @throws FireflyException
      */
     public function store(AttachmentStoreRequest $request): JsonResponse
     {
@@ -203,7 +202,7 @@ class AttachmentController extends Controller
 
         $resource = new Item($attachment, $transformer, 'attachments');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -226,7 +225,7 @@ class AttachmentController extends Controller
 
         $resource = new Item($attachment, $transformer, 'attachments');
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**

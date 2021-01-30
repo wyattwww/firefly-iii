@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Επεξεργασία κουμπαρά ":name"',
     'preferences'            => 'Προτιμήσεις',
     'profile'                => 'Προφίλ',
+    'accounts'               => 'Accounts',
     'changePassword'         => 'Αλλάξτε τον κωδικό σας',
     'change_email'           => 'Αλλάξτε τη διεύθυνση του email σας',
     'bills'                  => 'Πάγια έξοδα',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Διαγραφή συνδέσμου μεταξύ των συναλλαγών',
     'telemetry_index'        => 'Τηλεμετρία',
     'telemetry_view'         => 'Προβολή τηλεμετρίας',
+    'edit_object_group'      => 'Επεξεργασία ομάδας ":title"',
+    'delete_object_group'    => 'Διαγραφή ομάδας ":title"',
+    'logout_others'          => 'Αποσυνδέσετε τις άλλες συνεδρίες'
 ];

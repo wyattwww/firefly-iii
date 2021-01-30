@@ -23,23 +23,19 @@ declare(strict_types=1);
 namespace FireflyIII\Http\Requests;
 
 use FireflyIII\Models\Budget;
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use FireflyIII\Validation\AutoBudget\ValidatesAutoBudgetRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
 /**
  * @codeCoverageIgnore
  * Class BudgetFormUpdateRequest
  */
-class BudgetFormUpdateRequest extends Request
+class BudgetFormUpdateRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        return auth()->check();
-    }
+    use ConvertsDataTypes, ValidatesAutoBudgetRequest, ChecksLogin;
 
     /**
      * Returns the data required by the controller.

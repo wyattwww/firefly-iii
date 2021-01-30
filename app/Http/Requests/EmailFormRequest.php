@@ -22,23 +22,18 @@ declare(strict_types=1);
 
 namespace FireflyIII\Http\Requests;
 
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Class EmailFormRequest.
  *
  * @codeCoverageIgnore
  */
-class EmailFormRequest extends Request
+class EmailFormRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ChecksLogin, ConvertsDataTypes;
 
     /**
      * Rules for this request.

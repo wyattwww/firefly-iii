@@ -28,7 +28,6 @@ use FireflyIII\Models\Account;
 use FireflyIII\Models\TransactionGroup;
 use FireflyIII\Models\TransactionJournal;
 use FireflyIII\Models\TransactionJournalLink;
-use FireflyIII\Models\TransactionJournalMeta;
 use FireflyIII\User;
 use Illuminate\Support\Collection;
 
@@ -43,15 +42,21 @@ interface JournalRepositoryInterface
     public function getLast(): ?TransactionJournal;
 
     /**
-     * TODO maybe create JSON repository?
-     *
-     * Search in journal descriptions.
-     *
-     * @param string $search
+     * @param array $types
      *
      * @return Collection
      */
-    public function searchJournalDescriptions(string $search): Collection;
+    public function findByType(array $types): Collection;
+
+    /**
+     * Search in journal descriptions.
+     *
+     * @param string $search
+     * @param int $limit
+     *
+     * @return Collection
+     */
+    public function searchJournalDescriptions(string $search, int $limit): Collection;
 
     /**
      * Deletes a transaction group.
@@ -66,18 +71,6 @@ interface JournalRepositoryInterface
      * @param TransactionJournal $journal
      */
     public function destroyJournal(TransactionJournal $journal): void;
-
-
-    /**
-     * TODO move to import repository.
-     *
-     * Find a journal by its hash.
-     *
-     * @param string $hash
-     *
-     * @return TransactionJournalMeta|null
-     */
-    public function findByHash(string $hash): ?TransactionJournalMeta;
 
     /**
      * TODO Refactor to "find".

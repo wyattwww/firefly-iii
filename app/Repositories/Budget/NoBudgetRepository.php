@@ -151,7 +151,7 @@ class NoBudgetRepository implements NoBudgetRepositoryInterface
                 'currency_name'           => $currency['name'],
                 'currency_symbol'         => $currency['symbol'],
                 'currency_decimal_places' => $currency['decimal_places'],
-                'amount'                  => $spent,
+                'amount'                  => number_format((float)$spent,$currency['decimal_places'], '.',''),
             ];
         }
 
@@ -160,6 +160,9 @@ class NoBudgetRepository implements NoBudgetRepositoryInterface
 
     /** @noinspection MoreThanThreeArgumentsInspection */
     /**
+     * TODO this method does not include foreign amount transactions. It only sums up "amount".
+     * TODO this probably also applies to the other "sumExpenses" methods.
+     *
      * @param Carbon                   $start
      * @param Carbon                   $end
      * @param Collection|null          $accounts
@@ -196,6 +199,7 @@ class NoBudgetRepository implements NoBudgetRepositoryInterface
                     'currency_decimal_places' => $journal['currency_decimal_places'],
                 ];
             $array[$currencyId]['sum'] = bcadd($array[$currencyId]['sum'], app('steam')->negative($journal['amount']));
+
         }
 
         return $array;

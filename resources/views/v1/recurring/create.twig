@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
 
-    <form action="{{ route('recurring.store') }}" method="post" id="store" class="form-horizontal">
+    <form action="{{ route('recurring.store') }}" method="post" id="store" class="form-horizontal" enctype="multipart/form-data">
         <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
         {# row with recurrence information #}
         <div class="row">
@@ -51,8 +51,8 @@
 
                         {# only correct way to do active checkbox #}
                         {{ ExpandedForm.checkbox('active', 1) }}
-
                         {{ ExpandedForm.checkbox('apply_rules',1) }}
+                        {{ ExpandedForm.file('attachments[]', {'multiple': 'multiple','helpText': trans('firefly.upload_max_file_size', {'size': uploadSize|filesize}) }) }}
                     </div>
                 </div>
             </div>
@@ -87,16 +87,16 @@
                         {{ ExpandedForm.text('transaction_description') }}
                         {# transaction information (mandatory) #}
                         {{ CurrencyForm.currencyList('transaction_currency_id', defaultCurrency.id) }}
-                        {{ ExpandedForm.amountNoCurrency('amount', []) }}
+                        {{ ExpandedForm.amountNoCurrency('amount') }}
 
                         {# source account if withdrawal, or if transfer: #}
-                        {{ AccountForm.activeLongAccountList('source_id', null, {label: trans('form.asset_source_account')}) }}
+                        {{ AccountForm.longAccountList('source_id', null, {label: trans('form.asset_source_account')}) }}
 
                         {# for deposits, a drop down with revenue accounts, loan debt cash and mortgage #}
                         {{ AccountForm.activeDepositDestinations('deposit_source_id', null, {label: trans('form.deposit_source_id')}) }}
 
                         {# destination if deposit or transfer: #}
-                        {{ AccountForm.activeLongAccountList('destination_id', null, {label: trans('form.asset_destination_account')} ) }}
+                        {{ AccountForm.longAccountList('destination_id', null, {label: trans('form.asset_destination_account')} ) }}
 
                         {# destination account name for withdrawals #}
                         {#{{ ExpandedForm.text('destination_name', null, {label: trans('form.expense_account')}) }} #}
@@ -115,8 +115,8 @@
                     </div>
                     <div class="box-body">
                         {# transaction information (optional) #}
-                        {{ CurrencyForm.currencyListEmpty('foreign_currency_id', 0) }}
-                        {{ ExpandedForm.amountNoCurrency('foreign_amount', []) }}
+                        {{ CurrencyForm.currencyListEmpty('foreign_currency_id') }}
+                        {{ ExpandedForm.amountNoCurrency('foreign_amount') }}
 
                         {# BUDGET ONLY WHEN CREATING A WITHDRAWAL #}
                         {% if budgets|length > 1 %}
@@ -132,7 +132,7 @@
                         {{ ExpandedForm.text('tags') }}
 
                         {# RELATE THIS TRANSFER TO A PIGGY BANK #}
-                        {{ PiggyBankForm.piggyBankList('piggy_bank_id',0) }}
+                        {{ PiggyBankForm.piggyBankList('piggy_bank_id') }}
                     </div>
                 </div>
             </div>

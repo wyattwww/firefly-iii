@@ -24,7 +24,9 @@ declare(strict_types=1);
 namespace FireflyIII\Console\Commands;
 
 use FireflyIII\Support\System\GeneratesInstallationId;
+use FireflyIII\User;
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 
 /**
  * Class UpgradeFireflyInstructions.
@@ -48,16 +50,17 @@ class UpgradeFireflyInstructions extends Command
      */
     protected $signature = 'firefly:instructions {task}';
 
+
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
         $this->generateInstallationId();
-        if ('update' === (string) $this->argument('task')) {
+        if ('update' === (string)$this->argument('task')) {
             $this->updateInstructions();
         }
-        if ('install' === (string) $this->argument('task')) {
+        if ('install' === (string)$this->argument('task')) {
             $this->installInstructions();
         }
 
@@ -68,6 +71,11 @@ class UpgradeFireflyInstructions extends Command
         app('telemetry')->feature('system.database.driver', env('DB_CONNECTION', '(unknown)'));
         app('telemetry')->feature('system.os.is_docker', $isDocker);
         app('telemetry')->feature('system.command.executed', $this->signature);
+        try {
+            app('telemetry')->feature('system.users.count', (string)User::count());
+        } catch (QueryException $e) {
+            // ignore error.
+        }
 
         return 0;
     }
@@ -105,8 +113,8 @@ class UpgradeFireflyInstructions extends Command
     {
         /** @var string $version */
         $version = config('firefly.version');
-        $config  = config('upgrade.text.install');
-        $text    = '';
+        $config = config('upgrade.text.install');
+        $text = '';
         foreach (array_keys($config) as $compare) {
             // if string starts with:
             if (0 === strpos($version, $compare)) {
@@ -153,8 +161,8 @@ class UpgradeFireflyInstructions extends Command
     {
         /** @var string $version */
         $version = config('firefly.version');
-        $config  = config('upgrade.text.upgrade');
-        $text    = '';
+        $config = config('upgrade.text.upgrade');
+        $text = '';
         foreach (array_keys($config) as $compare) {
             // if string starts with:
             if (0 === strpos($version, $compare)) {

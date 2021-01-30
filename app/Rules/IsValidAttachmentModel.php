@@ -28,7 +28,6 @@ use FireflyIII\Models\Account;
 use FireflyIII\Models\Bill;
 use FireflyIII\Models\Budget;
 use FireflyIII\Models\Category;
-use FireflyIII\Models\ImportJob;
 use FireflyIII\Models\PiggyBank;
 use FireflyIII\Models\Tag;
 use FireflyIII\Models\Transaction;
@@ -37,7 +36,6 @@ use FireflyIII\Repositories\Account\AccountRepositoryInterface;
 use FireflyIII\Repositories\Bill\BillRepositoryInterface;
 use FireflyIII\Repositories\Budget\BudgetRepositoryInterface;
 use FireflyIII\Repositories\Category\CategoryRepositoryInterface;
-use FireflyIII\Repositories\ImportJob\ImportJobRepositoryInterface;
 use FireflyIII\Repositories\Journal\JournalAPIRepositoryInterface;
 use FireflyIII\Repositories\Journal\JournalRepositoryInterface;
 use FireflyIII\Repositories\PiggyBank\PiggyBankRepositoryInterface;
@@ -94,7 +92,6 @@ class IsValidAttachmentModel implements Rule
             Bill::class               => 'validateBill',
             Budget::class             => 'validateBudget',
             Category::class           => 'validateCategory',
-            ImportJob::class          => 'validateImportJob',
             PiggyBank::class          => 'validatePiggyBank',
             Tag::class                => 'validateTag',
             Transaction::class        => 'validateTransaction',
@@ -212,20 +209,6 @@ class IsValidAttachmentModel implements Rule
      *
      * @return bool
      */
-    private function validateImportJob(int $value): bool
-    {
-        /** @var ImportJobRepositoryInterface $repository */
-        $repository = app(ImportJobRepositoryInterface::class);
-        $repository->setUser(auth()->user());
-
-        return null !== $repository->find($value);
-    }
-
-    /**
-     * @param int $value
-     *
-     * @return bool
-     */
     private function validateBill(int $value): bool
     {
         /** @var BillRepositoryInterface $repository */
@@ -246,8 +229,6 @@ class IsValidAttachmentModel implements Rule
         $replace = '';
         $model   = str_replace($search, $replace, $model);
 
-        $model = sprintf('FireflyIII\Models\%s', $model);
-
-        return $model;
+        return sprintf('FireflyIII\Models\%s', $model);
     }
 }

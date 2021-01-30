@@ -27,13 +27,7 @@ $(function () {
         makeAutoComplete();
     })
     $('[data-toggle="tooltip"]').tooltip();
-
-    $('#clone_button').click(cloneNewFunction);
 });
-
-function cloneNewFunction() {
-    return confirm(newCloneInstructions);
-}
 
 function getLinkModal(e) {
     var button = $(e.currentTarget);
@@ -66,7 +60,7 @@ function makeAutoComplete() {
             }
         },
         remote: {
-            url: acURI + '?search=%QUERY&uid=' + uid,
+            url: acURI + '?query=%QUERY&uid=' + uid,
             wildcard: '%QUERY',
             filter: function (list) {
                 return $.map(list, function (item) {

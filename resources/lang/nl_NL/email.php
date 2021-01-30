@@ -33,6 +33,14 @@ return [
     'admin_test_subject'               => 'Een testbericht van je Firefly III-installatie',
     'admin_test_body'                  => 'Dit is een testbericht vanaf jouw Firefly III-installatie. Het is verstuurd naar :email.',
 
+    // new IP
+    'login_from_new_ip'                => 'Nieuwe login op Firefly III',
+    'new_ip_body'                      => 'Firefly III heeft een nieuwe login op je account gedetecteerd van een onbekend IP-adres. Je krijgt deze waarschuwing omdat je nooit hebt ingelogd vanaf het onderstaande IP-adres, of dat was meer dan zes maanden geleden.',
+    'new_ip_warning'                   => 'Je mag dit bericht negeren als je het IP adres herkent. Als je niet hebt ingelogd of je hebt geen flauw idee waar dit over gaat, zorg dan dat je je wachtwoord verandert en al je andere sessies uitlogt. Dit kan op je profielpagina. Je hebt 2FA al aanstaan toch? Stay safe!',
+    'ip_address'                       => 'IP adres',
+    'host_name'                        => 'Host',
+    'date_time'                        => 'Datum & tijd',
+
     // access token created
     'access_token_created_subject'     => 'Er is een nieuw access token gegenereerd',
     'access_token_created_body'        => 'Zojuist heeft iemand (hopelijk jij) voor jouw gebruikersaccount een nieuw Firefly III API Access Token gemaakt.',
@@ -44,7 +52,7 @@ return [
     'registered_welcome'               => 'Welkom bij <a style="color:#337ab7" href=":address">Firefly III</a>. Deze e-mail bevestigt je registratie. Hoera!',
     'registered_pw'                    => 'Als je nu al je wachtwoord bent vergeten <a style="color:#337ab7" href=":address/password/reset">reset deze dan meteen</a>.',
     'registered_help'                  => 'Er staat een help-icoontje rechtsboven op elke pagina. Gebruik die vooral!',
-    'registered_doc_html'              => 'Lees de <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/grand-theory">grand theory</a> als je dat nog niet had gedaan.',
+    'registered_doc_html'              => 'Lees de <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/personal-finances">grand theory</a> als je dat nog niet had gedaan.',
     'registered_doc_text'              => 'Lees de handleiding en de beschrijving van Firefly III als je dat nog niet gedaan had.',
     'registered_closing'               => 'Geniet ervan!',
     'registered_firefly_iii_link'      => 'Firefly III:',

@@ -76,10 +76,6 @@ class JournalUpdateService
     private $transactionGroup;
     /** @var TransactionJournal The journal to update. */
     private $transactionJournal;
-    /** @var Account If new account info is submitted, this array will hold the valid destination. */
-    private $validDestination;
-    /** @var Account If new account info is submitted, this array will hold the valid source. */
-    private $validSource;
 
     /**
      * JournalUpdateService constructor.
@@ -93,7 +89,7 @@ class JournalUpdateService
         $this->accountRepository  = app(AccountRepositoryInterface::class);
         $this->currencyRepository = app(CurrencyRepositoryInterface::class);
         $this->metaString         = ['sepa_cc', 'sepa_ct_op', 'sepa_ct_id', 'sepa_db', 'sepa_country', 'sepa_ep', 'sepa_ci', 'sepa_batch_id', 'recurrence_id',
-                                     'internal_reference', 'bunq_payment_id', 'external_id',];
+                                     'internal_reference', 'bunq_payment_id', 'external_id', 'external_uri'];
         $this->metaDate           = ['interest_date', 'book_date', 'process_date', 'due_date', 'payment_date', 'invoice_date',];
     }
 
@@ -378,9 +374,9 @@ class JournalUpdateService
         $sourceName = $this->data['source_name'] ?? null;
 
         if (!$this->hasFields(['source_id', 'source_name'])) {
-            $sourceAccount = $this->getOriginalSourceAccount();
-            $sourceId      = $sourceAccount->id;
-            $sourceName    = $sourceAccount->name;
+            $origSourceAccount = $this->getOriginalSourceAccount();
+            $sourceId          = $origSourceAccount->id;
+            $sourceName        = $origSourceAccount->name;
         }
 
         // make new account validator.
@@ -417,9 +413,9 @@ class JournalUpdateService
             return;
         }
 
-        $sourceTransaction = $this->getSourceTransaction();
-        $sourceTransaction->account()->associate($source);
-        $sourceTransaction->save();
+        $origSourceTransaction = $this->getSourceTransaction();
+        $origSourceTransaction->account()->associate($source);
+        $origSourceTransaction->save();
 
         $destTransaction = $this->getDestinationTransaction();
         $destTransaction->account()->associate($destination);
@@ -451,9 +447,9 @@ class JournalUpdateService
 
             return;
         }
-        $sourceTransaction         = $this->getSourceTransaction();
-        $sourceTransaction->amount = app('steam')->negative($amount);
-        $sourceTransaction->save();
+        $origSourceTransaction         = $this->getSourceTransaction();
+        $origSourceTransaction->amount = app('steam')->negative($amount);
+        $origSourceTransaction->save();
 
 
         $destTransaction         = $this->getDestinationTransaction();
@@ -479,8 +475,8 @@ class JournalUpdateService
             )
             && TransactionType::WITHDRAWAL === $type
         ) {
-            $billId                            = (int) ($this->data['bill_id'] ?? 0);
-            $billName                          = (string) ($this->data['bill_name'] ?? '');
+            $billId                            = (int)($this->data['bill_id'] ?? 0);
+            $billName                          = (string)($this->data['bill_name'] ?? '');
             $bill                              = $this->billRepository->findBill($billId, $billName);
             $this->transactionJournal->bill_id = null === $bill ? null : $bill->id;
             Log::debug('Updated bill ID');
@@ -547,12 +543,27 @@ class JournalUpdateService
     /**
      * Update journal generic field. Cannot be set to NULL.
      *
-     * @param $fieldName
+     * @param string $fieldName
      */
-    private function updateField($fieldName): void
+    private function updateField(string $fieldName): void
     {
         if (array_key_exists($fieldName, $this->data) && '' !== (string)$this->data[$fieldName]) {
-            $this->transactionJournal->$fieldName = $this->data[$fieldName];
+            $value = $this->data[$fieldName];
+
+            if ('date' === $fieldName) {
+                if ($value instanceof Carbon) {
+                    // update timezone.
+                    $value->setTimezone(config('app.timezone'));
+                }
+                if (!($value instanceof Carbon)) {
+                    $value = new Carbon($value);
+                }
+                // do some parsing.
+                Log::debug(sprintf('Create date value from string "%s".', $value));
+            }
+
+
+            $this->transactionJournal->$fieldName = $value;
             Log::debug(sprintf('Updated %s', $fieldName));
         }
     }
@@ -698,7 +709,7 @@ class JournalUpdateService
     {
         // update notes.
         if ($this->hasFields(['notes'])) {
-            $notes = '' === (string) $this->data['notes'] ? null : $this->data['notes'];
+            $notes = '' === (string)$this->data['notes'] ? null : $this->data['notes'];
             $this->storeNotes($this->transactionJournal, $notes);
         }
     }

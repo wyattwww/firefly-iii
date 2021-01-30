@@ -1,25 +1,25 @@
-<!--
-TODO: reconcile
-TODO: hide and show columns
--->
-<table class="table table-condensed table-hover table-responsive">
+<table class="table table-condensed table-hover table-responsive table-sortable">
     <thead>
     <tr>
         {% if showCategory or showBudget %}
-            <td colspan="7" class="no-margin-pagination">{{ groups.render|raw }}</td>
+            <td colspan="7" class="no-margin-pagination">{{ groups.render()|raw }}</td>
         {% else %}
-            <td colspan="6" class="no-margin-pagination">{{ groups.render|raw }}</td>
+            <td colspan="6" class="no-margin-pagination">{{ groups.render()|raw }}</td>
         {% endif %}
         <td colspan="1" class="hidden-xs">
             <!-- Single button -->
             <div class="btn-group btn-group-xs action-menu pull-right" style="display: none;">
-                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
                     {{ 'actions'|_ }} <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right">
-                    <li><a href="#" class="mass-edit"><i class="fa fa-fw fa-pencil"></i> <span>{{ 'mass_edit'|_ }}</span></a></li>
-                    <li><a href="#" class="bulk-edit"><i class="fa fa-fw fa-pencil-square-o"></i> <span>{{ 'bulk_edit'|_ }}</span></a></li>
-                    <li><a href="#" class="mass-delete"><i class="fa fa-fw fa-trash"></i> <span>{{ 'mass_delete'|_ }}</span></a></li>
+                    <li><a href="#" class="mass-edit"><i class="fa fa-fw fa-pencil"></i>
+                            <span>{{ 'mass_edit'|_ }}</span></a></li>
+                    <li><a href="#" class="bulk-edit"><i class="fa fa-fw fa-pencil-square-o"></i>
+                            <span>{{ 'bulk_edit'|_ }}</span></a></li>
+                    <li><a href="#" class="mass-delete"><i class="fa fa-fw fa-trash"></i>
+                            <span>{{ 'mass_delete'|_ }}</span></a></li>
                 </ul>
             </div>
         </td>
@@ -49,10 +49,11 @@ TODO: hide and show columns
     <tbody>
     {% for group in groups %}
         {% if group.count > 1 %}
-            <tr style="border-top:1px #aaa solid;">
+            <tr style="border-top:1px #aaa solid;" class="unsortable">
                 <td colspan="2" style="border-top:1px #aaa solid;">
                     <small><strong>
-                            <a href="{{ route('transactions.show', [group.id]) }}" title="{{ group.title }}">{{ group.title }}</a>
+                            <a href="{{ route('transactions.show', [group.id]) }}"
+                               title="{{ group.title }}">{{ group.title }}</a>
                         </strong></small>
                 </td>
                 <td colspan="2" style="border-top:1px #aaa solid;">
@@ -76,12 +77,16 @@ TODO: hide and show columns
                 {% endif %}
                 <td style="border-top:1px #aaa solid;" class="hidden-xs">
                     <div class="btn-group btn-group-xs pull-right">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
                             {{ 'actions'|_ }} <span class="caret"></span></button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                            <li><a href="{{ route('transactions.edit', [group.id]) }}"><i class="fa fa-fw fa-pencil"></i> {{ 'edit'|_ }}</a></li>
-                            <li><a href="{{ route('transactions.delete', [group.id]) }}"><i class="fa fa-fw fa-trash"></i> {{ 'delete'|_ }}</a></li>
-                            <li><a href="{{ route('transactions.clone', [group.id]) }}"><i class="fa fa-copy fa-fw"></i> {{ 'clone'|_ }}</a></li>
+                            <li><a href="{{ route('transactions.edit', [group.id]) }}"><i
+                                            class="fa fa-fw fa-pencil"></i> {{ 'edit'|_ }}</a></li>
+                            <li><a href="{{ route('transactions.delete', [group.id]) }}"><i
+                                            class="fa fa-fw fa-trash"></i> {{ 'delete'|_ }}</a></li>
+                            <li><a href="{{ route('transactions.clone', [group.id]) }}"><i
+                                            class="fa fa-copy fa-fw"></i> {{ 'clone'|_ }}</a></li>
                         </ul>
                     </div>
                 </td>
@@ -93,25 +98,25 @@ TODO: hide and show columns
             {% if group.transactions|length == loop.index and group.count > 1 %}
                 {% set style="border-bottom:1px #aaa solid;" %}
             {% endif %}
-            <tr data-date="{{ transaction.date.format('Y-m-d') }}">
+            <tr data-date="{{ transaction.date.format('Y-m-d') }}" data-count="{{ group.count }}" data-id="{{ group.id }}">
                 <td style=" {{ style|raw }}" class="hidden-xs">
                     {% if transaction.transaction_type_type == 'Withdrawal' %}
-                        <i class="fa fa-long-arrow-left fa-fw" title="{{ trans('firefly.Withdrawal') }}"></i>
+                        <i class="object-handle fa fa-long-arrow-left fa-fw" title="{{ trans('firefly.Withdrawal') }}"></i>
                     {% endif %}
 
                     {% if transaction.transaction_type_type == 'Deposit' %}
-                        <i class="fa fa-long-arrow-right fa-fw" title="{{ trans('firefly.Deposit') }}"></i>
+                        <i class="object-handle fa fa-long-arrow-right fa-fw" title="{{ trans('firefly.Deposit') }}"></i>
                     {% endif %}
 
                     {% if transaction.transaction_type_type == 'Transfer' %}
-                        <i class="fa fa-exchange fa-fw" title="{{ trans('firefly.Transfer') }}"></i>
+                        <i class="object-handle fa fa-exchange fa-fw" title="{{ trans('firefly.Transfer') }}"></i>
                     {% endif %}
 
                     {% if transaction.transaction_type_type == 'Reconciliation' %}
-                        <i class="fa-fw fa fa-calculator" title="{{ trans('firefly.reconciliation_transaction') }}"></i>
+                        <i class="object-handle fa-fw fa fa-calculator" title="{{ trans('firefly.reconciliation_transaction') }}"></i>
                     {% endif %}
                     {% if transaction.transaction_type_type == 'Opening balance' %}
-                        <i class="fa-fw fa fa-star-o" title="{{ trans('firefly.Opening balance') }}"></i>
+                        <i class="object-handle fa-fw fa fa-star-o" title="{{ trans('firefly.Opening balance') }}"></i>
                     {% endif %}
 
                 </td>
@@ -155,6 +160,18 @@ TODO: hide and show columns
                                 ({{ formatAmountBySymbol(transaction.foreign_amount, transaction.foreign_currency_symbol, transaction.foreign_currency_decimal_places) }})
                             {% endif %}
                         {% endif %}
+                    {% elseif transaction.transaction_type_type == 'Reconciliation' %}
+                        {% if transaction.source_account_type == 'Reconciliation account' %}
+                            {{ formatAmountBySymbol(transaction.amount*-1, transaction.currency_symbol, transaction.currency_decimal_places) }}
+                            {% if null != transaction.foreign_amount %}
+                                ({{ formatAmountBySymbol(transaction.foreign_amount*-1, transaction.foreign_currency_symbol, transaction.foreign_currency_decimal_places) }})
+                            {% endif %}
+                        {% else %}
+                            {{ formatAmountBySymbol(transaction.amount, transaction.currency_symbol, transaction.currency_decimal_places) }}
+                            {% if null != transaction.foreign_amount %}
+                                ({{ formatAmountBySymbol(transaction.foreign_amount, transaction.foreign_currency_symbol, transaction.foreign_currency_decimal_places) }})
+                            {% endif %}
+                        {% endif %}
                     {% else %}
                         {{ formatAmountBySymbol(transaction.amount, transaction.currency_symbol, transaction.currency_decimal_places) }}
                         {% if null != transaction.foreign_amount %}
@@ -166,12 +183,20 @@ TODO: hide and show columns
                     {{ transaction.date.formatLocalized(monthAndDayFormat) }}
                 </td>
                 <td style=" {{ style|raw }}">
-                    <a href="{{ route('accounts.show', [transaction.source_account_id|default(1)]) }}"
-                       title="{{ transaction.source_account_iban|default(transaction.source_account_name) }}">{{ transaction.source_account_name }}</a>
+                    {% if 'Cash account' == transaction.source_account_type %}
+                        <span class="text-success">({{ 'cash'|_ }})</span>
+                    {% else %}
+                        <a href="{{ route('accounts.show', [transaction.source_account_id|default(1)]) }}"
+                           title="{{ transaction.source_account_iban|default(transaction.source_account_name) }}">{{ transaction.source_account_name }}</a>
+                    {% endif %}
                 </td>
                 <td style=" {{ style|raw }}">
-                    <a href="{{ route('accounts.show', [transaction.destination_account_id|default(1)]) }}"
-                       title="{{ transaction.destination_account_iban|default(transaction.destination_account_name) }}">{{ transaction.destination_account_name }}</a>
+                    {% if 'Cash account' == transaction.destination_account_type %}
+                        <span class="text-success">({{ 'cash'|_ }})</span>
+                    {% else %}
+                        <a href="{{ route('accounts.show', [transaction.destination_account_id|default(1)]) }}"
+                           title="{{ transaction.destination_account_iban|default(transaction.destination_account_name) }}">{{ transaction.destination_account_name }}</a>
+                    {% endif %}
                 </td>
                 {% if showCategory %}
                     <td style=" {{ style|raw }}" class="hidden-xs">
@@ -193,14 +218,20 @@ TODO: hide and show columns
                 {% if group.count == 1 %}
                     <td style=" {{ style|raw }};" class="hidden-xs">
                         <div class="btn-group btn-group-xs pull-right">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
                                 {{ 'actions'|_ }} <span class="caret"></span></button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                <li><a href="{{ route('transactions.edit', [group.id]) }}"><i class="fa fa-fw fa-pencil"></i> {{ 'edit'|_ }}</a></li>
-                                <li><a href="{{ route('transactions.delete', [group.id]) }}"><i class="fa fa-fw fa-trash"></i> {{ 'delete'|_ }}</a></li>
-                                <li><a href="{{ route('transactions.clone', [group.id]) }}"><i class="fa fa-copy fa-fw"></i> {{ 'clone'|_ }}</a></li>
-                                <li><a href="{{ route('rules.create-from-journal', [transaction.transaction_journal_id]) }}"><i
-                                                class="fa fa-fw fa-random"></i> {{ 'create_rule_from_transaction'|_ }}</a></li>
+                                <li><a href="{{ route('transactions.edit', [group.id]) }}"><i
+                                                class="fa fa-fw fa-pencil"></i> {{ 'edit'|_ }}</a></li>
+                                <li><a href="{{ route('transactions.delete', [group.id]) }}"><i
+                                                class="fa fa-fw fa-trash"></i> {{ 'delete'|_ }}</a></li>
+                                <li><a href="{{ route('transactions.clone', [group.id]) }}"><i
+                                                class="fa fa-copy fa-fw"></i> {{ 'clone'|_ }}</a></li>
+                                <li>
+                                    <a href="{{ route('rules.create-from-journal', [transaction.transaction_journal_id]) }}"><i
+                                                class="fa fa-fw fa-random"></i> {{ 'create_rule_from_transaction'|_ }}
+                                    </a></li>
                             </ul>
                         </div>
                     </td>
@@ -213,9 +244,11 @@ TODO: hide and show columns
                 {% endif %}
                 <td style="{{ style|raw }}" class="hidden-xs">
                     <div class="pull-right">
-                        <input id="list_{{ transaction.transaction_journal_id }}" value="{{ transaction.transaction_journal_id }}"
+                        <input id="list_{{ transaction.transaction_journal_id }}"
+                               value="{{ transaction.transaction_journal_id }}"
                                name="journals[{{ transaction.transaction_journal_id }}]"
-                               type="checkbox" class="mass-select form-check-inline" data-value="{{ transaction.transaction_journal_id }}"/>
+                               type="checkbox" class="mass-select form-check-inline"
+                               data-value="{{ transaction.transaction_journal_id }}"/>
                     </div>
                 </td>
             </tr>
@@ -228,13 +261,17 @@ TODO: hide and show columns
             <div class="pull-right">
                 <!-- Single button -->
                 <div class="btn-group action-menu btn-group-xs pull-right" style="display:none;">
-                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
                         {{ 'actions'|_ }} <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu btn-group-xs dropdown-menu-right">
-                        <li><a href="#" class="mass-edit"><i class="fa fa-fw fa-pencil"></i> <span>{{ 'mass_edit'|_ }}</span></a></li>
-                        <li><a href="#" class="bulk-edit"><i class="fa fa-fw fa-pencil-square-o"></i> <span>{{ 'bulk_edit'|_ }}</span></a></li>
-                        <li><a href="#" class="mass-delete"><i class="fa fa-fw fa-trash"></i> <span>{{ 'mass_delete'|_ }}</span></a></li>
+                        <li><a href="#" class="mass-edit"><i class="fa fa-fw fa-pencil"></i>
+                                <span>{{ 'mass_edit'|_ }}</span></a></li>
+                        <li><a href="#" class="bulk-edit"><i class="fa fa-fw fa-pencil-square-o"></i>
+                                <span>{{ 'bulk_edit'|_ }}</span></a></li>
+                        <li><a href="#" class="mass-delete"><i class="fa fa-fw fa-trash"></i>
+                                <span>{{ 'mass_delete'|_ }}</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -242,9 +279,9 @@ TODO: hide and show columns
     </tr>
     <tr>
         {% if showCategory or showBudget %}
-            <td colspan="9" class="no-margin-pagination">{{ groups.render|raw }}</td>
+            <td colspan="9" class="no-margin-pagination">{{ groups.render()|raw }}</td>
         {% else %}
-            <td colspan="8" class="no-margin-pagination">{{ groups.render|raw }}</td>
+            <td colspan="8" class="no-margin-pagination">{{ groups.render()|raw }}</td>
         {% endif %}
     </tr>
     </tfoot>

@@ -30,6 +30,7 @@ return [
     'edit_piggyBank'         => 'Modifica salvadanaio ":name"',
     'preferences'            => 'Preferenze',
     'profile'                => 'Profilo',
+    'accounts'               => 'Conti',
     'changePassword'         => 'Cambia la tua password',
     'change_email'           => 'Cambia il tuo indirizzo email',
     'bills'                  => 'Bollette',
@@ -59,4 +60,7 @@ return [
     'delete_journal_link'    => 'Elimina il collegamento tra le transazioni',
     'telemetry_index'        => 'Telemetria',
     'telemetry_view'         => 'Visualizza telemetria',
+    'edit_object_group'      => 'Modifica gruppo ":title"',
+    'delete_object_group'    => 'Elimina gruppo ":title"',
+    'logout_others'          => 'Esci dalle altre sessioni'
 ];

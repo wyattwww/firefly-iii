@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /**
  * FixRecurringTransactions.php
  * Copyright (c) 2020 james@firefly-iii.org
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Console\Commands\Correction;
 
@@ -52,12 +54,13 @@ class FixRecurringTransactions extends Command
     /** @var UserRepositoryInterface */
     private $userRepos;
 
+
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $start = microtime(true);
         $this->stupidLaravel();
@@ -65,7 +68,7 @@ class FixRecurringTransactions extends Command
 
 
         $end = round(microtime(true) - $start, 2);
-        $this->info(sprintf('Corrected recurring transactions %s seconds.', $end));
+        $this->info(sprintf('Corrected recurring transactions in %s seconds.', $end));
 
         return 0;
     }
@@ -78,28 +81,7 @@ class FixRecurringTransactions extends Command
         $users = $this->userRepos->all();
         /** @var User $user */
         foreach ($users as $user) {
-            $this->recurringRepos->setUser($user);
-            $recurrences = $this->recurringRepos->get();
-            /** @var Recurrence $recurrence */
-            foreach ($recurrences as $recurrence) {
-                /** @var RecurrenceTransaction $transaction */
-                foreach ($recurrence->recurrenceTransactions as $transaction) {
-                    $source      = $transaction->sourceAccount;
-                    $destination = $transaction->destinationAccount;
-                    $type        = $recurrence->transactionType;
-                    $link        = config(sprintf('firefly.account_to_transaction.%s.%s', $source->accountType->type, $destination->accountType->type));
-                    if (null !== $link && strtolower($type->type) !== strtolower($link)) {
-                        $this->warn(
-                            sprintf('Recurring transaction #%d should be a "%s" but is a "%s" and will be corrected.', $recurrence->id, $link, $type->type)
-                        );
-                        $transactionType = TransactionType::whereType($link)->first();
-                        if (null !== $transactionType) {
-                            $recurrence->transaction_type_id = $transactionType->id;
-                            $recurrence->save();
-                        }
-                    }
-                }
-            }
+            $this->processUser($user);
         }
     }
 
@@ -116,5 +98,49 @@ class FixRecurringTransactions extends Command
         $this->userRepos      = app(UserRepositoryInterface::class);
     }
 
+    /**
+     * @param User $user
+     */
+    private function processUser(User $user): void
+    {
+        $this->recurringRepos->setUser($user);
+        $recurrences = $this->recurringRepos->get();
+        /** @var Recurrence $recurrence */
+        foreach ($recurrences as $recurrence) {
+            $this->processRecurrence($recurrence);
+        }
+    }
 
+    /**
+     * @param Recurrence $recurrence
+     */
+    private function processRecurrence(Recurrence $recurrence): void
+    {
+        /** @var RecurrenceTransaction $transaction */
+        foreach ($recurrence->recurrenceTransactions as $transaction) {
+            $this->processTransaction($recurrence, $transaction);
+        }
+    }
+
+    /**
+     * @param Recurrence            $recurrence
+     * @param RecurrenceTransaction $transaction
+     */
+    private function processTransaction(Recurrence $recurrence, RecurrenceTransaction $transaction): void
+    {
+        $source      = $transaction->sourceAccount;
+        $destination = $transaction->destinationAccount;
+        $type        = $recurrence->transactionType;
+        $link        = config(sprintf('firefly.account_to_transaction.%s.%s', $source->accountType->type, $destination->accountType->type));
+        if (null !== $link && strtolower($type->type) !== strtolower($link)) {
+            $this->warn(
+                sprintf('Recurring transaction #%d should be a "%s" but is a "%s" and will be corrected.', $recurrence->id, $link, $type->type)
+            );
+            $transactionType = TransactionType::whereType($link)->first();
+            if (null !== $transactionType) {
+                $recurrence->transaction_type_id = $transactionType->id;
+                $recurrence->save();
+            }
+        }
+    }
 }

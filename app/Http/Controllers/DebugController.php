@@ -121,23 +121,30 @@ class DebugController extends Controller
         $search  = ['~', '#'];
         $replace = ['\~', '# '];
 
-        $now            = Carbon::now()->format('Y-m-d H:i:s e');
-        $installationId = app('fireflyconfig')->get('installation_id', '')->data;
-        $phpVersion     = str_replace($search, $replace, PHP_VERSION);
-        $phpOs          = str_replace($search, $replace, PHP_OS);
-        $interface      = PHP_SAPI;
-        $drivers        = implode(', ', DB::availableDrivers());
-        $currentDriver  = DB::getDriverName();
-        $userAgent      = $request->header('user-agent');
-        $trustedProxies = config('firefly.trusted_proxies');
-        $displayErrors  = ini_get('display_errors');
-        $errorReporting = $this->errorReporting((int) ini_get('error_reporting'));
-        $appEnv         = config('app.env');
-        $appDebug       = var_export(config('app.debug'), true);
-        $logChannel     = config('logging.default');
-        $appLogLevel    = config('logging.level');
-        $cacheDriver    = config('cache.default');
-        $loginProvider  = config('auth.providers.users.driver');
+        $now                  = Carbon::now()->format('Y-m-d H:i:s e');
+        $installationIdConfig = app('fireflyconfig')->get('installation_id', '');
+        $installationId       = $installationIdConfig ? $installationIdConfig->data : '';
+        $phpVersion           = str_replace($search, $replace, PHP_VERSION);
+        $phpOs                = str_replace($search, $replace, PHP_OS);
+        $interface            = PHP_SAPI;
+        $drivers              = implode(', ', DB::availableDrivers());
+        $currentDriver        = DB::getDriverName();
+        $userAgent            = $request->header('user-agent');
+        $trustedProxies       = config('firefly.trusted_proxies');
+        $displayErrors        = ini_get('display_errors');
+        $errorReporting       = $this->errorReporting((int) ini_get('error_reporting'));
+        $appEnv               = config('app.env');
+        $appDebug             = var_export(config('app.debug'), true);
+        $logChannel           = config('logging.default');
+        $appLogLevel          = config('logging.level');
+        $cacheDriver          = config('cache.default');
+        $loginProvider        = config('auth.providers.users.driver');
+        $bcscale              = bcscale();
+        $layout               = env('FIREFLY_III_LAYOUT');
+
+        // expected + found DB version:
+        $expectedDBversion = config('firefly.db_version');
+        $foundDBversion = \FireflyConfig::get('db_version',1)->data;
 
         // some new vars.
         $telemetry       = true === config('firefly.send_telemetry') && true === config('firefly.feature_flags.telemetry');
@@ -187,6 +194,8 @@ class DebugController extends Controller
             compact(
                 'phpVersion',
                 'localeAttempts',
+                'expectedDBversion',
+                'foundDBversion',
                 'appEnv',
                 'appDebug',
                 'logChannel',
@@ -195,6 +204,8 @@ class DebugController extends Controller
                 'drivers',
                 'currentDriver',
                 'loginProvider',
+                'bcscale',
+                'layout',
                 'userAgent',
                 'displayErrors',
                 'installationId',
@@ -224,15 +235,14 @@ class DebugController extends Controller
     {
         $set    = RouteFacade::getRoutes();
         $ignore = ['chart.', 'javascript.', 'json.', 'report-data.', 'popup.', 'debugbar.', 'attachments.download', 'attachments.preview',
-                   'bills.rescan', 'budgets.income', 'currencies.def', 'error', 'flush', 'help.show', 'import.file',
+                   'bills.rescan', 'budgets.income', 'currencies.def', 'error', 'flush', 'help.show',
                    'login', 'logout', 'password.reset', 'profile.confirm-email-change', 'profile.undo-email-change',
                    'register', 'report.options', 'routes', 'rule-groups.down', 'rule-groups.up', 'rules.up', 'rules.down',
                    'rules.select', 'search.search', 'test-flash', 'transactions.link.delete', 'transactions.link.switch',
-                   'two-factor.lost', 'reports.options', 'debug', 'import.create-job', 'import.download', 'import.start', 'import.status.json',
+                   'two-factor.lost', 'reports.options', 'debug',
                    'preferences.delete-code', 'rules.test-triggers', 'piggy-banks.remove-money', 'piggy-banks.add-money',
                    'accounts.reconcile.transactions', 'accounts.reconcile.overview',
-                   'transactions.clone', 'two-factor.index', 'api.v1', 'installer.', 'attachments.view', 'import.create',
-                   'import.job.download', 'import.job.start', 'import.job.status.json', 'import.job.store', 'recurring.events',
+                   'transactions.clone', 'two-factor.index', 'api.v1', 'installer.', 'attachments.view', 'recurring.events',
                    'recurring.suggest',
         ];
         $return = '&nbsp;';
@@ -242,7 +252,7 @@ class DebugController extends Controller
             if (in_array('GET', $route->methods(), true)) {
                 $found = false;
                 foreach ($ignore as $string) {
-                    if (!(false === stripos($name, $string))) {
+                    if (false !== stripos($name, $string)) {
                         $found = true;
                         break;
                     }

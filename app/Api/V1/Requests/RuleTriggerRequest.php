@@ -26,17 +26,16 @@ namespace FireflyIII\Api\V1\Requests;
 
 
 use Carbon\Carbon;
-use FireflyIII\Models\Account;
-use FireflyIII\Models\AccountType;
-use FireflyIII\Repositories\Account\AccountRepositoryInterface;
-use Illuminate\Support\Collection;
-use Log;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class RuleTriggerRequest
  */
-class RuleTriggerRequest extends Request
+class RuleTriggerRequest extends FormRequest
 {
+    use ConvertsDataTypes;
+
     /**
      * Authorize logged in users.
      *
@@ -54,45 +53,10 @@ class RuleTriggerRequest extends Request
     public function getTriggerParameters(): array
     {
         return [
-            'start_date' => $this->getDate('start_date'),
-            'end_date'   => $this->getDate('end_date'),
-            'accounts'   => $this->getAccounts(),
+            'start'    => $this->getDate('start'),
+            'end'      => $this->getDate('end'),
+            'accounts' => $this->getAccounts(),
         ];
-    }
-
-    /**
-     * @return array
-     */
-    public function rules(): array
-    {
-        return [
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after:start_date',
-        ];
-    }
-
-    /**
-     * @return Collection
-     */
-    private function getAccounts(): Collection
-    {
-        $accountList = '' === (string) $this->query('accounts') ? [] : explode(',', $this->query('accounts'));
-        $accounts    = new Collection;
-
-        /** @var AccountRepositoryInterface $accountRepository */
-        $accountRepository = app(AccountRepositoryInterface::class);
-
-        foreach ($accountList as $accountId) {
-            Log::debug(sprintf('Searching for asset account with id "%s"', $accountId));
-            $account = $accountRepository->findNull((int) $accountId);
-            if ($this->validAccount($account)) {
-                /** @noinspection NullPointerExceptionInspection */
-                Log::debug(sprintf('Found account #%d ("%s") and its an asset account', $account->id, $account->name));
-                $accounts->push($account);
-            }
-        }
-
-        return $accounts;
     }
 
     /**
@@ -102,20 +66,28 @@ class RuleTriggerRequest extends Request
      */
     private function getDate(string $field): ?Carbon
     {
-        /** @var Carbon $result */
-        $result = null === $this->query($field) ? null : Carbon::createFromFormat('Y-m-d', $this->query($field));
-
-        return $result;
+        return null === $this->query($field) ? null : Carbon::createFromFormat('Y-m-d', $this->query($field));
     }
 
     /**
-     * @param Account|null $account
-     *
-     * @return bool
+     * @return string
      */
-    private function validAccount(?Account $account): bool
+    private function getAccounts(): string
     {
-        return null !== $account && AccountType::ASSET === $account->accountType->type;
+        return (string) $this->query('accounts');
+    }
+
+    /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'start'      => 'date',
+            'end'        => 'date|after:start',
+            'accounts'   => '',
+            'accounts.*' => 'exists:accounts,id|belongsToUser:accounts',
+        ];
     }
 
 }

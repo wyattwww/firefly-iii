@@ -70,7 +70,7 @@ $(function () {
             }).done(function () {
                 window.location.reload(true);
             }).fail(function () {
-                alert('Could not change date range');
+                console.error('Could not change date range');
             });
         }
     );
@@ -144,6 +144,11 @@ function listLengthInitial() {
     $('.listLengthTrigger').unbind('click').click(triggerList)
 }
 
+/**
+ *
+ * @param e
+ * @returns {boolean}
+ */
 function triggerList(e) {
     "use strict";
     var link = $(e.target);
@@ -153,12 +158,13 @@ function triggerList(e) {
         table.find('.overListLength').hide();
         table.attr('data-hidden', 'yes');
         link.text(showFullList);
-        return false;
     }
-    // show all, return false
-    table.find('.overListLength').show();
-    table.attr('data-hidden', 'no');
-    link.text(showOnlyTop);
+    if (table.attr('data-hidden') !== 'no') {
+        // show all, return false
+        table.find('.overListLength').show();
+        table.attr('data-hidden', 'no');
+        link.text(showOnlyTop);
+    }
 
     return false;
 }

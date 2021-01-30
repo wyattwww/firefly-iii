@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 /**
  * IndexController.php
- * Copyright (c) 2019 james@firefly-iii.org
+ * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -20,10 +20,11 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace FireflyIII\Http\Controllers\Export;
 
 
-use Carbon\Carbon;
 use FireflyIII\Http\Controllers\Controller;
 use FireflyIII\Http\Middleware\IsDemoUser;
 use FireflyIII\Repositories\Journal\JournalRepositoryInterface;
@@ -39,8 +40,7 @@ use League\Csv\CannotInsertRecord;
 class IndexController extends Controller
 {
 
-    /** @var JournalRepositoryInterface */
-    private $journalRepository;
+    private JournalRepositoryInterface $journalRepository;
 
     /**
      * IndexController constructor.
@@ -77,7 +77,7 @@ class IndexController extends Controller
         $generator->setExportTransactions(true);
 
         // get first transaction in DB:
-        $firstDate = new Carbon;
+        $firstDate = today(config('app.timezone'));
         $firstDate->subYear();
         $journal = $this->journalRepository->firstNull();
         if (null !== $journal) {

@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /**
  * OBValidation.php
  * Copyright (c) 2020 james@firefly-iii.org
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Validation\Account;
 
@@ -141,8 +143,6 @@ trait OBValidation
             $account->accountType = $accountType;
             $this->source         = $account;
         }
-        $result = $result ?? false;
-
-        return $result;
+        return $result ?? false;
     }
 }

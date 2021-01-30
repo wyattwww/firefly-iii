@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 /**
  * TransactionController.php
- * Copyright (c) 2020 thegrumpydictator@gmail.com
+ * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Http\Controllers\Chart;
 
@@ -85,6 +87,7 @@ class TransactionController extends Controller
             $data[$title]           = $data[$title] ?? [
                     'amount'          => '0',
                     'currency_symbol' => $journal['currency_symbol'],
+                    'currency_code'   => $journal['currency_code'],
                 ];
             $data[$title]['amount'] = bcadd($data[$title]['amount'], $journal['amount']);
         }
@@ -143,6 +146,7 @@ class TransactionController extends Controller
             $data[$title]           = $data[$title] ?? [
                     'amount'          => '0',
                     'currency_symbol' => $journal['currency_symbol'],
+                    'currency_code'   => $journal['currency_code'],
                 ];
             $data[$title]['amount'] = bcadd($data[$title]['amount'], $journal['amount']);
 
@@ -202,6 +206,7 @@ class TransactionController extends Controller
             $data[$title]           = $data[$title] ?? [
                     'amount'          => '0',
                     'currency_symbol' => $journal['currency_symbol'],
+                    'currency_code'   => $journal['currency_code'],
                 ];
             $data[$title]['amount'] = bcadd($data[$title]['amount'], $journal['amount']);
         }
@@ -260,6 +265,7 @@ class TransactionController extends Controller
             $data[$title]           = $data[$title] ?? [
                     'amount'          => '0',
                     'currency_symbol' => $journal['currency_symbol'],
+                    'currency_code'   => $journal['currency_code'],
                 ];
             $data[$title]['amount'] = bcadd($data[$title]['amount'], $journal['amount']);
 

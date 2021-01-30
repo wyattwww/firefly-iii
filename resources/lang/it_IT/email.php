@@ -33,6 +33,14 @@ return [
     'admin_test_subject'               => 'Un messaggio di prova dalla tua installazione di Firefly III',
     'admin_test_body'                  => 'Questo è un messaggio di prova dalla tua istanza Firefly III. È stato inviato a :email.',
 
+    // new IP
+    'login_from_new_ip'                => 'Nuovo accesso a Firefly III',
+    'new_ip_body'                      => 'Firefly III ha rilevato un nuovo accesso al tuo account da un indirizzo IP sconosciuto. Se non hai mai effettuato l\'accesso dall\'indirizzo sottostante, o se è stato effettuato più di sei mesi fa, Firefly III ti avviserà.',
+    'new_ip_warning'                   => 'Se riconosci questo indirizzo IP o l\'accesso, puoi ignorare questo messaggio. Se non hai effettuato l\'accesso, o se non hai idea di cosa si tratti, verifica la sicurezza della tua password, cambiala e disconnetti tutte le altre sessioni. Per fare questo, vai alla pagina del tuo profilo. Naturalmente hai già attivato l\'autenticazione a due fattori, giusto? Resta al sicuro!',
+    'ip_address'                       => 'Indirizzo IP',
+    'host_name'                        => 'Host',
+    'date_time'                        => 'Date e ora',
+
     // access token created
     'access_token_created_subject'     => 'È stato creato un nuovo token di accesso',
     'access_token_created_body'        => 'Qualcuno (si spera tu) ha appena creato un nuovo token di accesso personale per le API di Firefly III per il tuo account utente.',
@@ -44,7 +52,7 @@ return [
     'registered_welcome'               => 'Benvenuto in <a style="color:#337ab7" href=":address">Firefly III</a>. La tua registrazione è avvenuta e questa email è qui per confermarlo. Urrà!',
     'registered_pw'                    => 'Se hai già dimenticato la tua password, reimpostala usando <a style="color:#337ab7" href=":address/password/reset">lo strumento di reimpostazione password</a>.',
     'registered_help'                  => 'C\'è un\'icona di aiuto nell\'angolo in alto a destra di ogni pagina. Se hai bisogno di aiuto, clicca su di essa!',
-    'registered_doc_html'              => 'Se non lo hai già fatto, leggi la <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/grand-theory">grande teoria</a>.',
+    'registered_doc_html'              => 'If you haven\'t already, please read the <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/personal-finances">grand theory</a>.',
     'registered_doc_text'              => 'Se non lo hai già fatto, leggi la prima guida d\'uso e la descrizione completa.',
     'registered_closing'               => 'Divertiti!',
     'registered_firefly_iii_link'      => 'Firefly III:',

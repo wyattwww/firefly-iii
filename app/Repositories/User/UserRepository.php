@@ -28,6 +28,7 @@ use FireflyIII\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Log;
+use Str;
 
 /**
  * Class UserRepository.
@@ -35,16 +36,6 @@ use Log;
  */
 class UserRepository implements UserRepositoryInterface
 {
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
-
     /**
      * @return Collection
      */
@@ -261,8 +252,6 @@ class UserRepository implements UserRepositoryInterface
                                                     ->where('amount', '>', 0)
                                                     ->whereNull('budgets.deleted_at')
                                                     ->where('budgets.user_id', $user->id)->get(['budget_limits.budget_id'])->count();
-        $return['import_jobs']         = $user->importJobs()->count();
-        $return['import_jobs_success'] = $user->importJobs()->where('status', 'finished')->count();
         $return['rule_groups']         = $user->ruleGroups()->count();
         $return['rules']               = $user->rules()->count();
         $return['tags']                = $user->tags()->count();
@@ -329,7 +318,7 @@ class UserRepository implements UserRepositoryInterface
                 'blocked'      => $data['blocked'] ?? false,
                 'blocked_code' => $data['blocked_code'] ?? null,
                 'email'        => $data['email'],
-                'password'     => str_random(24),
+                'password'     => Str::random(24),
             ]
         );
         $role = $data['role'] ?? '';

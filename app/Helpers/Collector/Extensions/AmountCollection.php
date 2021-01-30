@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /**
  * AmountCollection.php
  * Copyright (c) 2020 james@firefly-iii.org
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Helpers\Collector\Extensions;
 
@@ -60,7 +62,7 @@ trait AmountCollection
     {
         $this->query->where(
             function (EloquentBuilder $q) use ($amount) {
-                $q->where('destination.amount', '<', app('steam')->positive($amount));
+                $q->where('destination.amount', '<=', app('steam')->positive($amount));
             }
         );
 
@@ -78,7 +80,7 @@ trait AmountCollection
     {
         $this->query->where(
             function (EloquentBuilder $q) use ($amount) {
-                $q->where('destination.amount', '>', app('steam')->positive($amount));
+                $q->where('destination.amount', '>=', app('steam')->positive($amount));
             }
         );
 

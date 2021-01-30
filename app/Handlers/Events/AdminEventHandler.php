@@ -52,6 +52,17 @@ class AdminEventHandler
             $email     = $event->user->email;
             $ipAddress = $event->ipAddress;
 
+            // if user is demo user, send to owner:
+            if($event->user->hasRole('demo')) {
+                $email = config('firefly.site_owner');
+            }
+
+            // see if user has alternative email address:
+            $pref = app('preferences')->getForUser($event->user, 'remote_guard_alt_email', null);
+            if (null !== $pref) {
+                $email = $pref->data;
+            }
+
             Log::debug(sprintf('Now in sendTestMessage event handler. Email is %s, IP is %s', $email, $ipAddress));
             try {
                 Log::debug('Trying to send message...');

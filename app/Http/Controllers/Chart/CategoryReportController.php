@@ -64,61 +64,6 @@ class CategoryReportController extends Controller
         );
     }
 
-    //
-    //    /**
-    //     * Chart for expenses grouped by expense account.
-    //     *
-    //     * TODO this chart is not multi-currency aware.
-    //     *
-    //     * @param Collection $accounts
-    //     * @param Collection $categories
-    //     * @param Carbon     $start
-    //     * @param Carbon     $end
-    //     * @param string     $others
-    //     *
-    //     * @return JsonResponse
-    //     */
-    //    public function accountExpense(Collection $accounts, Collection $categories, Carbon $start, Carbon $end, string $others): JsonResponse
-    //    {
-    //        /** @var MetaPieChartInterface $helper */
-    //        $helper = app(MetaPieChartInterface::class);
-    //        $helper->setAccounts($accounts)->setCategories($categories)->setStart($start)->setEnd($end)->setCollectOtherObjects(1 === (int)$others);
-    //
-    //        $chartData = $helper->generate('expense', 'account');
-    //        $data      = $this->generator->pieChart($chartData);
-    //
-    //        return response()->json($data);
-    //    }
-
-    //
-    //    /**
-    //     * Chart for income grouped by revenue account.
-    //     *
-    //     * TODO this chart is not multi-currency aware.
-    //     *
-    //     * @param Collection $accounts
-    //     * @param Collection $categories
-    //     * @param Carbon     $start
-    //     * @param Carbon     $end
-    //     * @param string     $others
-    //     *
-    //     * @return JsonResponse
-    //     */
-    //    public function accountIncome(Collection $accounts, Collection $categories, Carbon $start, Carbon $end, string $others): JsonResponse
-    //    {
-    //        /** @var MetaPieChartInterface $helper */
-    //        $helper = app(MetaPieChartInterface::class);
-    //        $helper->setAccounts($accounts);
-    //        $helper->setCategories($categories);
-    //        $helper->setStart($start);
-    //        $helper->setEnd($end);
-    //        $helper->setCollectOtherObjects(1 === (int)$others);
-    //        $chartData = $helper->generate('income', 'account');
-    //        $data      = $this->generator->pieChart($chartData);
-    //
-    //        return response()->json($data);
-    //    }
-
     /**
      * @param Collection $accounts
      * @param Collection $categories
@@ -142,6 +87,7 @@ class CategoryReportController extends Controller
                     $result[$title]           = $result[$title] ?? [
                             'amount'          => '0',
                             'currency_symbol' => $currency['currency_symbol'],
+                            'currency_code'   => $currency['currency_code'],
                         ];
                     $amount                   = app('steam')->positive($journal['amount']);
                     $result[$title]['amount'] = bcadd($result[$title]['amount'], $amount);
@@ -175,6 +121,7 @@ class CategoryReportController extends Controller
                 $result[$title] = $result[$title] ?? [
                         'amount'          => '0',
                         'currency_symbol' => $currency['currency_symbol'],
+                        'currency_code'   => $currency['currency_code'],
                     ];
                 foreach ($category['transaction_journals'] as $journal) {
                     $amount                   = app('steam')->positive($journal['amount']);
@@ -211,6 +158,7 @@ class CategoryReportController extends Controller
                 $result[$title] = $result[$title] ?? [
                         'amount'          => '0',
                         'currency_symbol' => $currency['currency_symbol'],
+                        'currency_code'   => $currency['currency_code'],
                     ];
                 foreach ($category['transaction_journals'] as $journal) {
                     $amount                   = app('steam')->positive($journal['amount']);
@@ -247,6 +195,7 @@ class CategoryReportController extends Controller
                     $result[$title]           = $result[$title] ?? [
                             'amount'          => '0',
                             'currency_symbol' => $currency['currency_symbol'],
+                            'currency_code'   => $currency['currency_code'],
                         ];
                     $amount                   = app('steam')->positive($journal['amount']);
                     $result[$title]['amount'] = bcadd($result[$title]['amount'], $amount);
@@ -282,6 +231,7 @@ class CategoryReportController extends Controller
                     $result[$title]           = $result[$title] ?? [
                             'amount'          => '0',
                             'currency_symbol' => $currency['currency_symbol'],
+                            'currency_code'   => $currency['currency_code'],
                         ];
                     $amount                   = app('steam')->positive($journal['amount']);
                     $result[$title]['amount'] = bcadd($result[$title]['amount'], $amount);
@@ -322,6 +272,7 @@ class CategoryReportController extends Controller
                     ),
                     'type'            => 'bar',
                     'currency_symbol' => $currency['currency_symbol'],
+                    'currency_code'   => $currency['currency_code'],
                     'currency_id'     => $currency['currency_id'],
                     'entries'         => $this->makeEntries($start, $end),
                 ];
@@ -348,6 +299,7 @@ class CategoryReportController extends Controller
                     ),
                     'type'            => 'bar',
                     'currency_symbol' => $currency['currency_symbol'],
+                    'currency_code'   => $currency['currency_code'],
                     'currency_id'     => $currency['currency_id'],
                     'entries'         => $this->makeEntries($start, $end),
                 ];
@@ -390,6 +342,7 @@ class CategoryReportController extends Controller
                     $result[$title]           = $result[$title] ?? [
                             'amount'          => '0',
                             'currency_symbol' => $currency['currency_symbol'],
+                            'currency_code'   => $currency['currency_code'],
                         ];
                     $amount                   = app('steam')->positive($journal['amount']);
                     $result[$title]['amount'] = bcadd($result[$title]['amount'], $amount);
@@ -425,6 +378,7 @@ class CategoryReportController extends Controller
                     $result[$title]           = $result[$title] ?? [
                             'amount'          => '0',
                             'currency_symbol' => $currency['currency_symbol'],
+                            'currency_code'   => $currency['currency_code'],
                         ];
                     $amount                   = app('steam')->positive($journal['amount']);
                     $result[$title]['amount'] = bcadd($result[$title]['amount'], $amount);

@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /**
  * MigrateRecurrenceMeta.php
  * Copyright (c) 2020 james@firefly-iii.org
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Console\Commands\Upgrade;
 
@@ -44,6 +46,7 @@ class MigrateRecurrenceMeta extends Command
      * @var string
      */
     protected $signature = 'firefly-iii:migrate-recurrence-meta {--F|force : Force the execution of this command.}';
+
 
     /**
      * Execute the console command.

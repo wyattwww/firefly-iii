@@ -22,13 +22,18 @@ declare(strict_types=1);
 
 namespace FireflyIII\Http\Requests;
 
+use FireflyIII\Support\Request\ChecksLogin;
+use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Class UserRegistrationRequest.
  *
  * @codeCoverageIgnore
  */
-class UserRegistrationRequest extends Request
+class UserRegistrationRequest extends FormRequest
 {
+    use ChecksLogin;
+
     /**
      * Verify the request.
      *

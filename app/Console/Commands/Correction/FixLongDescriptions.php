@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /**
  * FixLongDescriptions.php
  * Copyright (c) 2020 james@firefly-iii.org
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Console\Commands\Correction;
 
@@ -45,6 +47,7 @@ class FixLongDescriptions extends Command
      */
     protected $signature = 'firefly-iii:fix-long-descriptions';
 
+
     /**
      * Execute the console command.
      *
@@ -66,14 +69,15 @@ class FixLongDescriptions extends Command
         $groups = TransactionGroup::get(['id', 'title']);
         /** @var TransactionGroup $group */
         foreach ($groups as $group) {
-            if (strlen((string)$group->title) > self::MAX_LENGTH) {
+            if (strlen((string) $group->title) > self::MAX_LENGTH) {
                 $group->title = substr($group->title, 0, self::MAX_LENGTH);
                 $group->save();
                 $this->line(sprintf('Truncated description of transaction group #%d', $group->id));
             }
         }
         $end = round(microtime(true) - $start, 2);
-        $this->info(sprintf('Verified all transaction group and journal title lengths in %s seconds.', $end));
+        $this->info('Verified all transaction group and journal title lengths.');
+        $this->info(sprintf('Took %s seconds.', $end));
 
         return 0;
     }

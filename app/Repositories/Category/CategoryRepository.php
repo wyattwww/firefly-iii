@@ -28,6 +28,7 @@ use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Factory\CategoryFactory;
 use FireflyIII\Models\Attachment;
 use FireflyIII\Models\Category;
+use FireflyIII\Models\Note;
 use FireflyIII\Models\RecurrenceTransactionMeta;
 use FireflyIII\Models\RuleAction;
 use FireflyIII\Services\Internal\Destroy\CategoryDestroyService;
@@ -42,19 +43,7 @@ use Storage;
  */
 class CategoryRepository implements CategoryRepositoryInterface
 {
-    /** @var User */
-    private $user;
-
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-            die(__METHOD__);
-        }
-    }
+    private User $user;
 
     /**
      * @param Category $category
@@ -180,10 +169,7 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getCategories(): Collection
     {
-        /** @var Collection $set */
-        $set = $this->user->categories()->with(['attachments'])->orderBy('name', 'ASC')->get();
-
-        return $set;
+        return $this->user->categories()->with(['attachments'])->orderBy('name', 'ASC')->get();
     }
 
     /**
@@ -217,17 +203,18 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     /**
      * @param string $query
+     * @param int    $limit
      *
      * @return Collection
      */
-    public function searchCategory(string $query): Collection
+    public function searchCategory(string $query, int $limit): Collection
     {
         $search = $this->user->categories();
         if ('' !== $query) {
             $search->where('name', 'LIKE', sprintf('%%%s%%', $query));
         }
 
-        return $search->get();
+        return $search->take($limit)->get();
     }
 
     /**
@@ -255,9 +242,27 @@ class CategoryRepository implements CategoryRepositoryInterface
         if (null === $category) {
             throw new FireflyException(sprintf('400003: Could not store new category with name "%s"', $data['name']));
         }
+
+        if (array_key_exists('notes', $data) && '' === $data['notes']) {
+            $this->removeNotes($category);
+        }
+        if (array_key_exists('notes', $data) && '' !== $data['notes']) {
+            $this->updateNotes($category, $data['notes']);
+        }
+
         return $category;
 
     }
+
+
+    /**
+     * @param Category $category
+     */
+    public function removeNotes(Category $category): void
+    {
+        $category->notes()->delete();
+    }
+
 
     /**
      * @param Category $category
@@ -387,7 +392,7 @@ class CategoryRepository implements CategoryRepositoryInterface
         /** @var Storage $disk */
         $disk = Storage::disk('upload');
 
-        $set = $set->each(
+        return $set->each(
             static function (Attachment $attachment) use ($disk) {
                 $notes                   = $attachment->notes()->first();
                 $attachment->file_exists = $disk->exists($attachment->fileName());
@@ -396,7 +401,32 @@ class CategoryRepository implements CategoryRepositoryInterface
                 return $attachment;
             }
         );
+    }
 
-        return $set;
+    /**
+     * @inheritDoc
+     */
+    public function updateNotes(Category $category, string $notes): void
+    {
+        $dbNote = $category->notes()->first();
+        if (null === $dbNote) {
+            $dbNote = new Note;
+            $dbNote->noteable()->associate($category);
+        }
+        $dbNote->text = trim($notes);
+        $dbNote->save();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getNoteText(Category $category): ?string
+    {
+        $dbNote = $category->notes()->first();
+        if (null === $dbNote) {
+            return null;
+        }
+
+        return $dbNote->text;
     }
 }

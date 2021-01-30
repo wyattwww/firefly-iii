@@ -40,10 +40,6 @@ use Log;
 trait UserNavigation
 {
 
-    //if (!$this->isEditableAccount($account)) {
-    //            return $this->redirectAccountToAccount($account); // @codeCoverageIgnore
-    //        }
-
     /**
      * Will return false if you cant edit this account type.
      *
@@ -158,7 +154,7 @@ trait UserNavigation
         $uri = (string)session($identifier);
         Log::debug(sprintf('The URI is %s', $uri));
 
-        if (!(false === strpos($uri, 'jscript'))) {
+        if (false !== strpos($uri, 'jscript')) {
             $uri = $this->redirectUri; // @codeCoverageIgnore
             Log::debug(sprintf('URI is now %s (uri contains jscript)', $uri));
         }

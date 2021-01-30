@@ -22,23 +22,19 @@ declare(strict_types=1);
 
 namespace FireflyIII\Http\Requests;
 
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use FireflyIII\Validation\AutoBudget\ValidatesAutoBudgetRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
 /**
  * @codeCoverageIgnore
  * Class BudgetFormStoreRequest
  */
-class BudgetFormStoreRequest extends Request
+class BudgetFormStoreRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        return auth()->check();
-    }
+    use ConvertsDataTypes, ValidatesAutoBudgetRequest, ChecksLogin;
 
     /**
      * Returns the data required by the controller.
@@ -51,7 +47,7 @@ class BudgetFormStoreRequest extends Request
             'name'                    => $this->string('name'),
             'active'                  => $this->boolean('active'),
             'auto_budget_type'        => $this->integer('auto_budget_type'),
-            'transaction_currency_id' => $this->integer('transaction_currency_id'),
+            'transaction_currency_id' => $this->integer('auto_budget_currency_id'),
             'auto_budget_amount'      => $this->string('auto_budget_amount'),
             'auto_budget_period'      => $this->string('auto_budget_period'),
         ];

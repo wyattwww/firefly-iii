@@ -83,11 +83,11 @@ function getAvailableBox() {
             $('#box-left-to-spend').html(data.left_to_spend);
             $('#box-left-per-day').html(data.left_per_day);
         }
-        if(1=== data.display) {
+        if (1 === data.display) {
             $('#box-left-to-spend').html(data.left_to_spend);
             $('#box-left-per-day').html(data.left_per_day);
         }
-        if(2=== data.display) {
+        if (2 === data.display) {
             $('#box-left-to-spend').html(data.spent_total);
             $('#box-left-per-day').html(data.spent_per_day);
         }
@@ -100,9 +100,30 @@ function getAvailableBox() {
 function getBillsBox() {
     // box-bills-unpaid
     // box-bills-paid
-    $.getJSON('json/box/bills').done(function (data) {
-        $('#box-bills-paid').html(data.paid);
-        $('#box-bills-unpaid').html(data.unpaid);
+
+    // get summary.
+
+    $.getJSON('api/v1/summary/basic?start=' + sessionStart + '&end=' + sessionEnd).done(function (data) {
+        var key;
+        var unpaid = [];
+        var paid = [];
+        for (key in data) {
+            //console.log(key);
+            if (key.substr(0, 16) === 'bills-unpaid-in-') {
+                // only when less than 3.
+                if (unpaid.length < 3) {
+                    unpaid.push(data[key].value_parsed);
+                }
+            }
+            if (key.substr(0, 14) === 'bills-paid-in-') {
+                // only when less than 5.
+                if (paid.length < 3) {
+                    paid.push(data[key].value_parsed);
+                }
+            }
+        }
+        $('#box-bills-unpaid').html(unpaid.join(', '));
+        $('#box-bills-paid').html(paid.join(', '));
     });
 }
 
@@ -115,7 +136,7 @@ function getBalanceBox() {
     $.getJSON('json/box/balance').done(function (data) {
         if (data.size === 1) {
             // show balance in "sums", show single entry in list.
-            for (x in data.sums) {
+            for (var x in data.sums) {
                 $('#box-balance-sums').html(data.sums[x]);
                 $('#box-balance-list').html(data.incomes[x] + ' + ' + data.expenses[x]);
             }

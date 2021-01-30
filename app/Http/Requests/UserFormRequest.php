@@ -22,23 +22,18 @@ declare(strict_types=1);
 
 namespace FireflyIII\Http\Requests;
 
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Class UserFormRequest.
  *
  * @codeCoverageIgnore
  */
-class UserFormRequest extends Request
+class UserFormRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ConvertsDataTypes, ChecksLogin;
 
     /**
      * Get data for controller.

@@ -28,6 +28,7 @@ use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -121,22 +122,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @property-read int|null                                                          $transaction_journal_meta_count
  * @property-read int|null                                                          $transactions_count
  * @method static EloquentBuilder|TransactionJournal whereTransactionGroupId($value)
- * @property int $user_id
- * @property int|null $transaction_group_id
- * @property int|null $transaction_currency_id
- * @property \Illuminate\Support\Carbon|null $interest_date
- * @property \Illuminate\Support\Carbon|null $book_date
- * @property \Illuminate\Support\Carbon|null $process_date
- * @property int $order
- * @property bool $encrypted
- * @property-read \Illuminate\Database\Eloquent\Collection|\FireflyIII\Models\Budget[] $budgets
- * @property-read \FireflyIII\Models\TransactionGroup|null $transactionGroup
- * @property-read \Illuminate\Database\Eloquent\Collection|\FireflyIII\Models\TransactionJournalMeta[] $transactionJournalMeta
- * @property-read \Illuminate\Database\Eloquent\Collection|\FireflyIII\Models\Transaction[] $transactions
  */
 class TransactionJournal extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasFactory;
 
     /**
      * The attributes that should be casted to native types.
@@ -264,32 +253,6 @@ class TransactionJournal extends Model
      * @codeCoverageIgnore
      * @return bool
      */
-    public function isDeposit(): bool
-    {
-        if (null !== $this->transaction_type_type) {
-            return TransactionType::DEPOSIT === $this->transaction_type_type;
-        }
-
-        return $this->transactionType->isDeposit();
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @return bool
-     */
-    public function isOpeningBalance(): bool
-    {
-        if (null !== $this->transaction_type_type) {
-            return TransactionType::OPENING_BALANCE === $this->transaction_type_type;
-        }
-
-        return $this->transactionType->isOpeningBalance();
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @return bool
-     */
     public function isTransfer(): bool
     {
         if (null !== $this->transaction_type_type) {
@@ -297,19 +260,6 @@ class TransactionJournal extends Model
         }
 
         return $this->transactionType->isTransfer();
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @return bool
-     */
-    public function isWithdrawal(): bool
-    {
-        if (null !== $this->transaction_type_type) {
-            return TransactionType::WITHDRAWAL === $this->transaction_type_type;
-        }
-
-        return $this->transactionType->isWithdrawal();
     }
 
     /**
@@ -367,7 +317,7 @@ class TransactionJournal extends Model
         if (!self::isJoined($query, 'transaction_types')) {
             $query->leftJoin('transaction_types', 'transaction_types.id', '=', 'transaction_journals.transaction_type_id');
         }
-        if (count($types) > 0) {
+        if (!empty($types)) {
             $query->whereIn('transaction_types.type', $types);
         }
     }

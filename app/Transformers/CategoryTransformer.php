@@ -25,17 +25,17 @@ namespace FireflyIII\Transformers;
 
 
 use FireflyIII\Models\Category;
+use FireflyIII\Repositories\Category\CategoryRepositoryInterface;
 use FireflyIII\Repositories\Category\OperationsRepositoryInterface;
 use Illuminate\Support\Collection;
-use Log;
 
 /**
  * Class CategoryTransformer
  */
 class CategoryTransformer extends AbstractTransformer
 {
-    /** @var OperationsRepositoryInterface */
-    private $opsRepository;
+    private OperationsRepositoryInterface $opsRepository;
+    private CategoryRepositoryInterface   $repository;
 
     /**
      * CategoryTransformer constructor.
@@ -45,9 +45,7 @@ class CategoryTransformer extends AbstractTransformer
     public function __construct()
     {
         $this->opsRepository = app(OperationsRepositoryInterface::class);
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
+        $this->repository    = app(CategoryRepositoryInterface::class);
     }
 
     /**
@@ -60,6 +58,7 @@ class CategoryTransformer extends AbstractTransformer
     public function transform(Category $category): array
     {
         $this->opsRepository->setUser($category->user);
+        $this->repository->setUser($category->user);
 
         $spent  = [];
         $earned = [];
@@ -69,11 +68,14 @@ class CategoryTransformer extends AbstractTransformer
             $earned = $this->beautify($this->opsRepository->sumIncome($start, $end, null, new Collection([$category])));
             $spent  = $this->beautify($this->opsRepository->sumExpenses($start, $end, null, new Collection([$category])));
         }
-        $data = [
+        $notes = $this->repository->getNoteText($category);
+
+        return [
             'id'         => (int)$category->id,
             'created_at' => $category->created_at->toAtomString(),
             'updated_at' => $category->updated_at->toAtomString(),
             'name'       => $category->name,
+            'notes'      => $notes,
             'spent'      => $spent,
             'earned'     => $earned,
             'links'      => [
@@ -83,8 +85,6 @@ class CategoryTransformer extends AbstractTransformer
                 ],
             ],
         ];
-
-        return $data;
     }
 
     /**
@@ -96,7 +96,7 @@ class CategoryTransformer extends AbstractTransformer
     {
         $return = [];
         foreach ($array as $data) {
-            $data['sum'] = round($data['sum'], (int)$data['currency_decimal_places']);
+            $data['sum'] = number_format((float)$data['sum'], (int)$data['currency_decimal_places'], '.', '');
             $return[]    = $data;
         }
 

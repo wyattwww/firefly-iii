@@ -43,11 +43,8 @@ class TagController extends Controller
 {
     use PeriodOverview;
 
-    /** @var TagRepositoryInterface The tag repository. */
-    protected $repository;
-
-    /** @var AttachmentHelperInterface Helper for attachments. */
-    private $attachments;
+    protected TagRepositoryInterface $repository;
+    private AttachmentHelperInterface $attachmentsHelper;
 
     /**
      * TagController constructor.
@@ -62,7 +59,7 @@ class TagController extends Controller
                 app('view')->share('title', (string) trans('firefly.tags'));
                 app('view')->share('mainTitleIcon', 'fa-tag');
 
-                $this->attachments = app(AttachmentHelperInterface::class);
+                $this->attachmentsHelper = app(AttachmentHelperInterface::class);
                 $this->repository = app(TagRepositoryInterface::class);
 
                 return $next($request);
@@ -180,8 +177,9 @@ class TagController extends Controller
     public function index(TagRepositoryInterface $repository)
     {
         // start with oldest tag
-        $oldestTagDate = null === $repository->oldestTag() ? clone session('first') : $repository->oldestTag()->date;
-        $newestTagDate = null === $repository->newestTag() ? new Carbon : $repository->newestTag()->date;
+        $first = session('first', today()) ?? today();
+        $oldestTagDate = null === $repository->oldestTag() ? clone $first : $repository->oldestTag()->date;
+        $newestTagDate = null === $repository->newestTag() ? today() : $repository->newestTag()->date;
         $oldestTagDate->startOfYear();
         $newestTagDate->endOfYear();
         $tags            = [];
@@ -250,7 +248,7 @@ class TagController extends Controller
         );
 
         $startPeriod = $this->repository->firstUseDate($tag);
-        $startPeriod = $startPeriod ?? new Carbon;
+        $startPeriod = $startPeriod ?? today(config('app.timezone'));
         $endPeriod   = clone $end;
         $periods     = $this->getTagPeriodOverview($tag, $startPeriod, $endPeriod);
         $path        = route('tags.show', [$tag->id, $start->format('Y-m-d'), $end->format('Y-m-d')]);
@@ -284,8 +282,8 @@ class TagController extends Controller
         $pageSize     = (int) app('preferences')->get('listPageSize', 50)->data;
         $periods      = [];
         $subTitle     = (string) trans('firefly.all_journals_for_tag', ['tag' => $tag->tag]);
-        $start        = $this->repository->firstUseDate($tag) ?? new Carbon;
-        $end          = new Carbon;
+        $start        = $this->repository->firstUseDate($tag) ?? today(config('app.timezone'));
+        $end          = $this->repository->lastUseDate($tag) ?? today(config('app.timezone'));
         $attachments  = $this->repository->getAttachments($tag);
         $path         = route('tags.show', [$tag->id, 'all']);
         $location     = $this->repository->getLocation($tag);
@@ -322,14 +320,14 @@ class TagController extends Controller
         /** @var array $files */
         $files = $request->hasFile('attachments') ? $request->file('attachments') : null;
         if (null !== $files && !auth()->user()->hasRole('demo')) {
-            $this->attachments->saveAttachmentsForModel($result, $files);
+            $this->attachmentsHelper->saveAttachmentsForModel($result, $files);
         }
         if (null !== $files && auth()->user()->hasRole('demo')) {
             session()->flash('info',(string)trans('firefly.no_att_demo_user'));
         }
 
-        if (count($this->attachments->getMessages()->get('attachments')) > 0) {
-            $request->session()->flash('info', $this->attachments->getMessages()->get('attachments')); // @codeCoverageIgnore
+        if (count($this->attachmentsHelper->getMessages()->get('attachments')) > 0) {
+            $request->session()->flash('info', $this->attachmentsHelper->getMessages()->get('attachments')); // @codeCoverageIgnore
         }
 
 
@@ -365,14 +363,14 @@ class TagController extends Controller
         /** @var array $files */
         $files = $request->hasFile('attachments') ? $request->file('attachments') : null;
         if (null !== $files && !auth()->user()->hasRole('demo')) {
-            $this->attachments->saveAttachmentsForModel($tag, $files);
+            $this->attachmentsHelper->saveAttachmentsForModel($tag, $files);
         }
         if (null !== $files && auth()->user()->hasRole('demo')) {
             session()->flash('info',(string)trans('firefly.no_att_demo_user'));
         }
 
-        if (count($this->attachments->getMessages()->get('attachments')) > 0) {
-            $request->session()->flash('info', $this->attachments->getMessages()->get('attachments')); // @codeCoverageIgnore
+        if (count($this->attachmentsHelper->getMessages()->get('attachments')) > 0) {
+            $request->session()->flash('info', $this->attachmentsHelper->getMessages()->get('attachments')); // @codeCoverageIgnore
         }
 
 

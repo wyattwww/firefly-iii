@@ -4,7 +4,7 @@
     </td>
     <td style="width:30%;">
         <select name="triggers[{{ count }}][type]" class="form-control">
-            {% for key,type in allRuleTriggers() %}
+            {% for key,type in triggers %}
                 <option value="{{ key }}" label="{{ type }}"
                         {% if key == oldTrigger %}
                             selected
@@ -13,9 +13,9 @@
             {% endfor %}
         </select>
     </td>
-    <td style="position: relative;">
-
-        <input autocomplete="off" type="text" value="{{ oldValue }}" name="triggers[{{ count }}][value]" class="form-control">
+    <td>
+        <input autocomplete="off" type="text" value="{{ oldValue }}" name="triggers[{{ count }}][value]"
+               class="form-control">
         {% if errors.has('triggers.'~count~'.value') %}
             <p class="text-danger">
                 {{ errors.first('triggers.'~count~'.value') }}

@@ -34,18 +34,18 @@ use Route;
  * Class Controller.
  *
  */
-class Controller extends BaseController
+abstract class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests, UserNavigation, RequestInformation;
 
     /** @var string Format for date and time. */
-    protected $dateTimeFormat;
+    protected string $dateTimeFormat;
     /** @var string Format for "23 Feb, 2016". */
-    protected $monthAndDayFormat;
+    protected string $monthAndDayFormat;
     /** @var string Format for "March 2018" */
-    protected $monthFormat;
+    protected string $monthFormat;
     /** @var string Redirect user */
-    protected $redirectUri = '/';
+    protected string $redirectUri = '/';
 
     /**
      * Controller constructor.
@@ -55,11 +55,19 @@ class Controller extends BaseController
     public function __construct()
     {
         // is site a demo site?
-        $isDemoSite = app('fireflyconfig')->get('is_demo_site', config('firefly.configuration.is_demo_site',),)->data;
+        $isDemoSiteConfig = app('fireflyconfig')->get('is_demo_site', config('firefly.configuration.is_demo_site', false,),);
+        $isDemoSite = $isDemoSiteConfig ? $isDemoSiteConfig->data : false;
         app('view')->share('IS_DEMO_SITE', $isDemoSite,);
         app('view')->share('DEMO_USERNAME', config('firefly.demo_username'));
         app('view')->share('DEMO_PASSWORD', config('firefly.demo_password'));
         app('view')->share('FF_VERSION', config('firefly.version'));
+
+        // share custom auth guard info.
+        $authGuard = config('firefly.authentication_guard');
+        $logoutUri = config('firefly.custom_logout_uri');
+
+        app('view')->share('authGuard', $authGuard);
+        app('view')->share('logoutUri', $logoutUri);
 
         // upload size
         $maxFileSize = app('steam')->phpBytes(ini_get('upload_max_filesize'));

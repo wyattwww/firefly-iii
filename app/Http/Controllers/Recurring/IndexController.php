@@ -34,7 +34,6 @@ use FireflyIII\Transformers\RecurrenceTransformer;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
@@ -45,8 +44,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 class IndexController extends Controller
 {
     use GetConfigurationData;
-    /** @var RecurringRepositoryInterface Recurring repository */
-    private $recurring;
+    private RecurringRepositoryInterface $recurringRepos;
 
     /**
      * IndexController constructor.
@@ -63,7 +61,7 @@ class IndexController extends Controller
                 app('view')->share('mainTitleIcon', 'fa-paint-brush');
                 app('view')->share('title', (string) trans('firefly.recurrences'));
 
-                $this->recurring = app(RecurringRepositoryInterface::class);
+                $this->recurringRepos = app(RecurringRepositoryInterface::class);
 
                 return $next($request);
             }
@@ -84,13 +82,12 @@ class IndexController extends Controller
     {
         $page       = 0 === (int) $request->get('page') ? 1 : (int) $request->get('page');
         $pageSize   = (int) app('preferences')->get('listPageSize', 50)->data;
-        $collection = $this->recurring->get();
-        $today      = new Carbon;
-        $year       = new Carbon;
+        $collection = $this->recurringRepos->get();
+        $today      = today(config('app.timezone'));
+        $year       = today(config('app.timezone'));
 
         // split collection
         $total = $collection->count();
-        /** @var Collection $recurrences */
         $recurrences = $collection->slice(($page - 1) * $pageSize, $pageSize);
 
         /** @var RecurrenceTransformer $transformer */
@@ -111,6 +108,8 @@ class IndexController extends Controller
             $array['first_date']   = new Carbon($array['first_date']);
             $array['repeat_until'] = null === $array['repeat_until'] ? null : new Carbon($array['repeat_until']);
             $array['latest_date']  = null === $array['latest_date'] ? null : new Carbon($array['latest_date']);
+            // lazy but OK
+            $array['attachments'] = $recurrence->attachments()->count();
 
             // make carbon objects out of occurrences
             foreach ($array['repetitions'] as $repIndex => $repetition) {
@@ -118,10 +117,6 @@ class IndexController extends Controller
                     $array['repetitions'][$repIndex]['occurrences'][$occIndex] = new Carbon($occurrence);
                 }
             }
-
-            //if (0 !== $recurrence->recurrenceRepetitions->count()) {
-            //$array['ocurrences'] = array_slice($this->recurring->getOccurrencesInRange($recurrence->recurrenceRepetitions->first(), $today, $year), 0, 1);
-            //}
 
             $recurring[] = $array;
         }

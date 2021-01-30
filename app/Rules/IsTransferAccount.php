@@ -1,8 +1,8 @@
 <?php
-declare(strict_types=1);
+
 /**
  * IsTransferAccount.php
- * Copyright (c) 2019 james@firefly-iii.org
+ * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -19,6 +19,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace FireflyIII\Rules;
 
@@ -69,6 +71,6 @@ class IsTransferAccount implements Rule
         $validAccount = $validator->validateSource((int)$value, null, null);
         Log::debug(sprintf('Search by id (%d), result is %s.', (int)$value, var_export($validAccount, true)));
 
-        return !(false === $validAccount);
+        return false !== $validAccount;
     }
 }

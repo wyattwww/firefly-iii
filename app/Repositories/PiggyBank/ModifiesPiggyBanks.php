@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /**
  * ModifiesPiggyBanks.php
  * Copyright (c) 2020 james@firefly-iii.org
@@ -20,10 +20,13 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace FireflyIII\Repositories\PiggyBank;
 
 
 use Carbon\Carbon;
+use DB;
 use Exception;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Models\Note;
@@ -31,6 +34,8 @@ use FireflyIII\Models\PiggyBank;
 use FireflyIII\Models\PiggyBankEvent;
 use FireflyIII\Models\PiggyBankRepetition;
 use FireflyIII\Models\TransactionJournal;
+use FireflyIII\Repositories\ObjectGroup\CreatesObjectGroups;
+use FireflyIII\User;
 use Illuminate\Database\QueryException;
 use Log;
 
@@ -39,7 +44,7 @@ use Log;
  */
 trait ModifiesPiggyBanks
 {
-
+    use CreatesObjectGroups;
     /**
      * @param PiggyBank $piggyBank
      * @param string    $amount
@@ -61,6 +66,17 @@ trait ModifiesPiggyBanks
 
         return true;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeObjectGroup(PiggyBank $piggyBank): PiggyBank
+    {
+        $piggyBank->objectGroups()->sync([]);
+
+        return $piggyBank;
+    }
+
 
     /**
      * @param PiggyBankRepetition $repetition
@@ -85,7 +101,7 @@ trait ModifiesPiggyBanks
      */
     public function canAddAmount(PiggyBank $piggyBank, string $amount): bool
     {
-        $leftOnAccount = $this->leftOnAccount($piggyBank, new Carbon);
+        $leftOnAccount = $this->leftOnAccount($piggyBank, today(config('app.timezone')));
         $savedSoFar    = (string) $this->getRepetition($piggyBank)->currentamount;
         $leftToSave    = bcsub($piggyBank->targetamount, $savedSoFar);
         $maxAmount     = (string) min(round($leftOnAccount, 12), round($leftToSave, 12));
@@ -145,10 +161,7 @@ trait ModifiesPiggyBanks
         if (0 === bccomp('0', $amount)) {
             return new PiggyBankEvent;
         }
-        /** @var PiggyBankEvent $event */
-        $event = PiggyBankEvent::create(['date' => Carbon::now(), 'amount' => $amount, 'piggy_bank_id' => $piggyBank->id]);
-
-        return $event;
+        return PiggyBankEvent::create(['date' => Carbon::now(), 'amount' => $amount, 'piggy_bank_id' => $piggyBank->id]);
     }
 
     /**
@@ -160,16 +173,13 @@ trait ModifiesPiggyBanks
      */
     public function createEventWithJournal(PiggyBank $piggyBank, string $amount, TransactionJournal $journal): PiggyBankEvent
     {
-        /** @var PiggyBankEvent $event */
-        $event = PiggyBankEvent::create(
+        return PiggyBankEvent::create(
             [
                 'piggy_bank_id'          => $piggyBank->id,
                 'transaction_journal_id' => $journal->id,
                 'date'                   => $journal->date->format('Y-m-d'),
                 'amount'                 => $amount]
         );
-
-        return $event;
     }
 
     /**
@@ -180,6 +190,7 @@ trait ModifiesPiggyBanks
      */
     public function destroy(PiggyBank $piggyBank): bool
     {
+        $piggyBank->objectGroups()->sync([]);
         $piggyBank->delete();
 
         return true;
@@ -248,6 +259,22 @@ trait ModifiesPiggyBanks
         return true;
     }
 
+
+    /**
+     * @inheritDoc
+     */
+    public function setObjectGroup(PiggyBank $piggyBank, string $objectGroupTitle): PiggyBank
+    {
+        $objectGroup = $this->findOrCreateObjectGroup($objectGroupTitle);
+        if (null !== $objectGroup) {
+            $piggyBank->objectGroups()->sync([$objectGroup->id]);
+        }
+
+        return $piggyBank;
+
+    }
+
+
     /**
      * @param array $data
      *
@@ -269,9 +296,27 @@ trait ModifiesPiggyBanks
 
         // repetition is auto created.
         $repetition = $this->getRepetition($piggyBank);
-        if (null !== $repetition && isset($data['current_amount'])) {
+        if (null !== $repetition && isset($data['current_amount']) && '' !== $data['current_amount']) {
             $repetition->currentamount = $data['current_amount'];
             $repetition->save();
+        }
+
+        $objectGroupTitle = $data['object_group'] ?? '';
+        if ('' !== $objectGroupTitle) {
+            $objectGroup = $this->findOrCreateObjectGroup($objectGroupTitle);
+            if (null !== $objectGroup) {
+                $piggyBank->objectGroups()->sync([$objectGroup->id]);
+                $piggyBank->save();
+            }
+        }
+        // try also with ID:
+        $objectGroupId = (int) ($data['object_group_id'] ?? 0);
+        if (0 !== $objectGroupId) {
+            $objectGroup = $this->findObjectGroupById($objectGroupId);
+            if (null !== $objectGroup) {
+                $piggyBank->objectGroups()->sync([$objectGroup->id]);
+                $piggyBank->save();
+            }
         }
 
         return $piggyBank;
@@ -283,24 +328,41 @@ trait ModifiesPiggyBanks
      *
      * @return PiggyBank
      */
-    public function update(PiggyBank $piggyBank, array $data): PiggyBank
-    {
-        if (isset($data['name']) && '' !== $data['name']) {
+    private function updateProperties(PiggyBank $piggyBank, array $data): PiggyBank {
+        if (array_key_exists('name', $data) && '' !== $data['name']) {
             $piggyBank->name = $data['name'];
         }
-        if (isset($data['account_id']) && 0 !== $data['account_id']) {
+        if (array_key_exists('account_id', $data) && 0 !== $data['account_id']) {
             $piggyBank->account_id = (int) $data['account_id'];
         }
-        if (isset($data['targetamount']) && '' !== $data['targetamount']) {
+        if (array_key_exists('targetamount', $data) && '' !== $data['targetamount']) {
             $piggyBank->targetamount = $data['targetamount'];
         }
-        if (isset($data['targetdate']) && '' !== $data['targetdate']) {
+        if (array_key_exists('targetdate', $data) && '' !== $data['targetdate']) {
             $piggyBank->targetdate = $data['targetdate'];
         }
         $piggyBank->startdate = $data['startdate'] ?? $piggyBank->startdate;
         $piggyBank->save();
+        return $piggyBank;
+    }
 
+    /**
+     * @param PiggyBank $piggyBank
+     * @param array     $data
+     *
+     * @return PiggyBank
+     */
+    public function update(PiggyBank $piggyBank, array $data): PiggyBank
+    {
+        $piggyBank = $this->updateProperties($piggyBank, $data);
         $this->updateNote($piggyBank, $data['notes'] ?? '');
+
+        // update the order of the piggy bank:
+        $oldOrder = (int) $piggyBank->order;
+        $newOrder = (int) ($data['order'] ?? $oldOrder);
+        if ($oldOrder !== $newOrder) {
+            $this->updateOrder($piggyBank, $oldOrder, $newOrder);
+        }
 
         // if the piggy bank is now smaller than the current relevant rep,
         // remove money from the rep.
@@ -311,6 +373,33 @@ trait ModifiesPiggyBanks
 
             $repetition->currentamount = $piggyBank->targetamount;
             $repetition->save();
+        }
+
+        // update using name:
+        $objectGroupTitle = $data['object_group'] ?? '';
+        if ('' !== $objectGroupTitle) {
+            $objectGroup = $this->findOrCreateObjectGroup($objectGroupTitle);
+            if (null !== $objectGroup) {
+                $piggyBank->objectGroups()->sync([$objectGroup->id]);
+                $piggyBank->save();
+            }
+            return $piggyBank;
+        }
+        // remove if name is empty. Should be overruled by ID.
+        if ('' === $objectGroupTitle) {
+            $piggyBank->objectGroups()->sync([]);
+            $piggyBank->save();
+        }
+
+        // try also with ID:
+        $objectGroupId = (int) ($data['object_group_id'] ?? 0);
+        if (0 !== $objectGroupId) {
+            $objectGroup = $this->findObjectGroupById($objectGroupId);
+            if (null !== $objectGroup) {
+                $piggyBank->objectGroups()->sync([$objectGroup->id]);
+                $piggyBank->save();
+            }
+            return $piggyBank;
         }
 
         return $piggyBank;
@@ -345,6 +434,40 @@ trait ModifiesPiggyBanks
         $dbNote->save();
 
         return true;
+    }
+
+    /**
+     * @param PiggyBank $piggyBank
+     * @param int       $oldOrder
+     * @param int       $newOrder
+     */
+    private function updateOrder(PiggyBank $piggyBank, int $oldOrder, int $newOrder): void
+    {
+        if ($newOrder > $oldOrder) {
+            // Iedereen [7 en lager] [hoger dan 3] behalve piggy zelf, puntje er af:
+            //piggy zelf naar 7
+            /** @var User $user */
+            $user = $this->user;
+            $user->piggyBanks()->where('piggy_banks.order', '<=', $newOrder)->where('piggy_banks.order', '>', $oldOrder)
+                 ->where('piggy_banks.id', '!=', $piggyBank->id)
+                 ->update(['piggy_banks.order' => DB::raw('piggy_banks.order-1')]);
+            $piggyBank->order = $newOrder;
+            $piggyBank->save();
+        }
+        if ($newOrder < $oldOrder) {
+            //
+            //Van 8 naar 2
+            // iedereen [2 of hoger] en [kleiner dan 8] puntje er bij.
+            //       8 naar 2
+            /** @var User $user */
+            $user = $this->user;
+            $user->piggyBanks()->where('piggy_banks.order', '>=', $newOrder)->where('piggy_banks.order', '<', $oldOrder)
+                 ->where('piggy_banks.id', '!=', $piggyBank->id)
+                 ->update(['piggy_banks.order' => DB::raw('piggy_banks.order+1')]);
+            $piggyBank->order = $newOrder;
+            $piggyBank->save();
+        }
+
     }
 
 }

@@ -19,31 +19,27 @@
   -->
 
 <template>
-    <div>
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-12 col-sm-12">
-                <passport-clients></passport-clients>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-12 col-sm-12">
-                <passport-authorized-clients></passport-authorized-clients>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-12 col-sm-12">
-                <passport-personal-access-tokens></passport-personal-access-tokens>
-            </div>
-        </div>
+  <div>
+    <div class="row">
+      <div class="col-lg-12">
+        <passport-clients></passport-clients>
+      </div>
     </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <passport-authorized-clients></passport-authorized-clients>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <passport-personal-access-tokens></passport-personal-access-tokens>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-    export default {
-        name: "ProfileOptions"
-    }
+export default {
+  name: "ProfileOptions"
+}
 </script>
-
-<style scoped>
-
-</style>

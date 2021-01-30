@@ -63,9 +63,10 @@ class JournalRepository implements JournalRepositoryInterface
      * Search in journal descriptions.
      *
      * @param string $search
+     * @param int $limit
      * @return Collection
      */
-    public function searchJournalDescriptions(string $search): Collection
+    public function searchJournalDescriptions(string $search, int $limit): Collection
     {
         $query = $this->user->transactionJournals()
                             ->orderBy('date', 'DESC');
@@ -73,7 +74,7 @@ class JournalRepository implements JournalRepositoryInterface
             $query->where('description', 'LIKE', sprintf('%%%s%%', $search));
         }
 
-        return $query->get();
+        return $query->take($limit)->get();
     }
 
     /**
@@ -96,32 +97,6 @@ class JournalRepository implements JournalRepositoryInterface
         /** @var JournalDestroyService $service */
         $service = app(JournalDestroyService::class);
         $service->destroy($journal);
-    }
-
-    /**
-     * Find a journal by its hash.
-     *
-     * @param string $hash
-     *
-     * @return TransactionJournalMeta|null
-     */
-    public function findByHash(string $hash): ?TransactionJournalMeta
-    {
-        $jsonEncode = json_encode($hash);
-        $hashOfHash = hash('sha256', $jsonEncode);
-        Log::debug(sprintf('JSON encoded hash is: %s', $jsonEncode));
-        Log::debug(sprintf('Hash of hash is: %s', $hashOfHash));
-
-        $result = TransactionJournalMeta::withTrashed()
-                                        ->leftJoin('transaction_journals', 'transaction_journals.id', '=', 'journal_meta.transaction_journal_id')
-                                        ->where('hash', $hashOfHash)
-                                        ->where('name', 'import_hash_v2')
-                                        ->first(['journal_meta.*']);
-        if (null === $result) {
-            Log::debug('Result is null');
-        }
-
-        return $result;
     }
 
     /**
@@ -240,7 +215,6 @@ class JournalRepository implements JournalRepositoryInterface
      */
     public function getLinkNoteText(TransactionJournalLink $link): string
     {
-        $notes = null;
         /** @var Note $note */
         $note = $link->notes()->first();
         if (null !== $note) {
@@ -421,5 +395,17 @@ class JournalRepository implements JournalRepositoryInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findByType(array $types): Collection
+    {
+        return $this->user
+            ->transactionJournals()
+            ->leftJoin('transaction_types', 'transaction_types.id', '=', 'transaction_journals.transaction_type_id')
+            ->whereIn('transaction_types.type', $types)
+            ->get(['transaction_journals.*']);
     }
 }

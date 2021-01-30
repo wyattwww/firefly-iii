@@ -24,6 +24,7 @@ namespace FireflyIII\Support;
 
 use Cache;
 use Exception;
+use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Models\Configuration;
 use Illuminate\Database\QueryException;
 use Log;
@@ -67,9 +68,10 @@ class FireflyConfig
 
     /**
      * @param string $name
-     * @param mixed $default
+     * @param null   $default
      *
-     * @return \FireflyIII\Models\Configuration|null
+     * @throws FireflyException
+     * @return Configuration|null
      */
     public function get(string $name, $default = null): ?Configuration
     {
@@ -82,9 +84,10 @@ class FireflyConfig
         }
 
         try {
+            /** @var Configuration $config */
             $config = Configuration::where('name', $name)->first(['id', 'name', 'data']);
         } catch (QueryException|Exception $e) {
-            return null;
+            throw new FireflyException(sprintf('Could not poll the database: %s', $e->getMessage()));
         }
 
         if ($config) {
@@ -151,7 +154,6 @@ class FireflyConfig
         if ('testing' === config('app.env')) {
             Log::warning(sprintf('%s should NOT be called in the TEST environment!', __METHOD__));
         }
-        Log::debug('Set new value for ', ['name' => $name]);
         /** @var Configuration $config */
         try {
             $config = Configuration::whereName($name)->first();
@@ -163,7 +165,6 @@ class FireflyConfig
             return $item;
         }
         if (null === $config) {
-            Log::debug('Does not exist yet ', ['name' => $name]);
             /** @var Configuration $item */
             $item       = new Configuration;
             $item->name = $name;
@@ -174,7 +175,6 @@ class FireflyConfig
 
             return $item;
         }
-        Log::debug('Exists already, overwrite value.', ['name' => $name]);
         $config->data = $value;
         $config->save();
         Cache::forget('ff-config-' . $name);

@@ -27,7 +27,6 @@ namespace FireflyIII\Factory;
 use FireflyIII\Models\Location;
 use FireflyIII\Models\Tag;
 use FireflyIII\User;
-use Illuminate\Support\Collection;
 use Log;
 
 /**
@@ -35,22 +34,7 @@ use Log;
  */
 class TagFactory
 {
-    /** @var Collection */
-    private $tags;
-    /** @var User */
-    private $user;
-
-    /**
-     * Constructor.
-     *
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
+    private User $user;
 
     /**
      * @param array $data
@@ -94,10 +78,12 @@ class TagFactory
     public function findOrCreate(string $tag): ?Tag
     {
         $tag = trim($tag);
+        Log::debug(sprintf('Now in TagFactory::findOrCreate("%s")', $tag));
 
         /** @var Tag $dbTag */
         $dbTag = $this->user->tags()->where('tag', $tag)->first();
         if (null !== $dbTag) {
+            Log::debug(sprintf('Tag exists (#%d), return it.', $dbTag->id));
             return $dbTag;
         }
         $newTag = $this->create(
@@ -110,6 +96,11 @@ class TagFactory
                 'zoom_level'  => null,
             ]
         );
+        if (null === $newTag) {
+            Log::error(sprintf('TagFactory::findOrCreate("%s") but tag is unexpectedly NULL!', $tag));
+            return null;
+        }
+        Log::debug(sprintf('Created new tag #%d ("%s")', $newTag->id, $newTag->tag));
 
         return $newTag;
     }

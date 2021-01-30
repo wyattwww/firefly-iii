@@ -53,18 +53,8 @@ use Log;
 class RecurringRepository implements RecurringRepositoryInterface
 {
     use CalculateRangeOccurrences, CalculateXOccurrences, CalculateXOccurrencesSince, FiltersWeekends;
-    /** @var User */
-    private $user;
+    private User $user;
 
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
 
     /**
      * Destroy a recurring transaction.
@@ -246,9 +236,7 @@ class RecurringRepository implements RecurringRepositoryInterface
 
 
         // filter out all the weekend days:
-        $occurrences = $this->filterWeekends($repetition, $occurrences);
-
-        return $occurrences;
+        return $this->filterWeekends($repetition, $occurrences);
     }
 
     /**
@@ -282,7 +270,6 @@ class RecurringRepository implements RecurringRepositoryInterface
         /** @var RecurrenceMeta $meta */
         foreach ($transaction->recurrenceTransactionMeta as $meta) {
             if ('tags' === $meta->name && '' !== $meta->value) {
-                //$tags = explode(',', $meta->value);
                 $tags = json_decode($meta->value, true, 512, JSON_THROW_ON_ERROR);
             }
         }
@@ -340,7 +327,7 @@ class RecurringRepository implements RecurringRepositoryInterface
         foreach ($journalMeta as $journalId) {
             $search[] = (int)$journalId;
         }
-        if (0 === count($search)) {
+        if (empty($search)) {
 
             return new Collection;
         }
@@ -387,9 +374,7 @@ class RecurringRepository implements RecurringRepositoryInterface
         }
 
         // filter out all the weekend days:
-        $occurrences = $this->filterWeekends($repetition, $occurrences);
-
-        return $occurrences;
+        return $this->filterWeekends($repetition, $occurrences);
     }
 
     /**
@@ -537,9 +522,7 @@ class RecurringRepository implements RecurringRepositoryInterface
 
         // filter out everything if "repeat_until" is set.
         $repeatUntil = $repetition->recurrence->repeat_until;
-        $occurrences = $this->filterMaxDate($repeatUntil, $occurrences);
-
-        return $occurrences;
+        return $this->filterMaxDate($repeatUntil, $occurrences);
     }
 
     /**
@@ -561,5 +544,37 @@ class RecurringRepository implements RecurringRepositoryInterface
         }
 
         return $filtered;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function destroyAll(): void
+    {
+        $this->user->recurrences()->delete();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function totalTransactions(Recurrence $recurrence, RecurrenceRepetition $repetition): int
+    {
+        // if repeat = null just return 0.
+        if (null === $recurrence->repeat_until && 0 === (int) $recurrence->repetitions) {
+            return 0;
+        }
+        // expect X transactions then stop. Return that number
+        if (null === $recurrence->repeat_until && 0 !== (int) $recurrence->repetitions) {
+            return (int) $recurrence->repetitions;
+        }
+
+        // need to calculate, this depends on the repetition:
+        if (null !== $recurrence->repeat_until && 0 === (int) $recurrence->repetitions) {
+            $occurrences = $this->getOccurrencesInRange($repetition, $recurrence->first_date ?? today(), $recurrence->repeat_until);
+
+            return count($occurrences);
+        }
+
+        return 0;
     }
 }

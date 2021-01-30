@@ -224,7 +224,7 @@ class AttachmentHelper implements AttachmentHelperInterface
             }
             Log::debug('Done processing uploads.');
         }
-        if (!is_array($files) || (is_array($files) && 0 === count($files))) {
+        if (!is_array($files) || empty($files)) {
             Log::debug('Array of files is not an array. Probably nothing uploaded. Will not store attachments.');
         }
 
@@ -306,7 +306,7 @@ class AttachmentHelper implements AttachmentHelperInterface
             $content = $fileObject->fread($file->getSize());
             Log::debug(sprintf('Full file length is %d and upload size is %d.', strlen($content), $file->getSize()));
 
-            // store it:
+            // store it without encryption.
             $this->uploadDisk->put($attachment->fileName(), $content);
             $attachment->uploaded = true; // update attachment
             $attachment->save();

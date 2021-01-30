@@ -23,24 +23,17 @@ declare(strict_types=1);
 namespace FireflyIII\Http\Requests;
 
 use Carbon\Carbon;
+use FireflyIII\Support\Request\ChecksLogin;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class SelectTransactionsRequest.
  *
  * @codeCoverageIgnore
  */
-class SelectTransactionsRequest extends Request
+class SelectTransactionsRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ChecksLogin;
 
     /**
      * Rules for this request.
@@ -56,8 +49,8 @@ class SelectTransactionsRequest extends Request
         $today        = Carbon::now()->addDay()->format('Y-m-d');
 
         return [
-            'start_date' => 'required|date|after:' . $first,
-            'end_date'   => 'required|date|before:' . $today,
+            'start'      => 'required|date|after:' . $first,
+            'end'        => 'required|date|before:' . $today,
             'accounts'   => 'required',
             'accounts.*' => 'required|exists:accounts,id|belongsToUser:accounts',
         ];

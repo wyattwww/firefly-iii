@@ -33,18 +33,26 @@ return [
     'admin_test_subject'               => 'A test message from your Firefly III installation',
     'admin_test_body'                  => 'This is a test message from your Firefly III instance. It was sent to :email.',
 
+    // new IP
+    'login_from_new_ip'                => 'New login on Firefly III',
+    'new_ip_body'                      => 'Firefly III detected a new login on your account from an unknown IP address. If you never logged in from the IP address below, or it has been more than six months ago, Firefly III will warn you.',
+    'new_ip_warning'                   => 'If you recognize this IP address or the login, you can ignore this message. If you didn\'t login, of if you have no idea what this is about, verify your password security, change it, and log out all other sessions. To do this, go to your profile page. Of course you have 2FA enabled already, right? Stay safe!',
+    'ip_address'                       => 'IP address',
+    'host_name'                        => 'Host',
+    'date_time'                        => 'Date + time',
+
     // access token created
     'access_token_created_subject'     => 'A new access token was created',
     'access_token_created_body'        => 'Somebody (hopefully you) just created a new Firefly III API Access Token for your user account.',
     'access_token_created_explanation' => 'With this token, they can access <strong>all</strong> of your financial records through the Firefly III API.',
-    'access_token_created_revoke'      => 'If this wasn\'t you, please revoke this token as soon as possible at :url.',
+    'access_token_created_revoke'      => 'Ha nem Ön kérte, kérem vonja vissza ezt a tokent a lehető leghamarabb itt: :url.',
 
     // registered
     'registered_subject'               => 'Welcome to Firefly III!',
     'registered_welcome'               => 'Welcome to <a style="color:#337ab7" href=":address">Firefly III</a>. Your registration has made it, and this email is here to confirm it. Yay!',
-    'registered_pw'                    => 'If you have forgotten your password already, please reset it using <a style="color:#337ab7" href=":address/password/reset">the password reset tool</a>.',
+    'registered_pw'                    => 'Ha elfelejtette a jelszavát, <a style="color:#337ab7" href=":address/password/reset">itt</a> visszaállíthatja.',
     'registered_help'                  => 'There is a help-icon in the top right corner of each page. If you need help, click it!',
-    'registered_doc_html'              => 'If you haven\'t already, please read the <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/grand-theory">grand theory</a>.',
+    'registered_doc_html'              => 'If you haven\'t already, please read the <a style="color:#337ab7" href="https://docs.firefly-iii.org/about-firefly-iii/personal-finances">grand theory</a>.',
     'registered_doc_text'              => 'If you haven\'t already, please read the first use guide and the full description.',
     'registered_closing'               => 'Enjoy!',
     'registered_firefly_iii_link'      => 'Firefly III:',

@@ -52,7 +52,19 @@ class APIEventHandler
         $user       = $repository->findNull((int) $event->userId);
         if (null !== $user) {
             $email     = $user->email;
+
+            // if user is demo user, send to owner:
+            if($user->hasRole('demo')) {
+                $email = config('firefly.site_owner');
+            }
+
             $ipAddress = Request::ip();
+
+            // see if user has alternative email address:
+            $pref = app('preferences')->getForUser($user, 'remote_guard_alt_email', null);
+            if (null !== $pref) {
+                $email = $pref->data;
+            }
 
             Log::debug(sprintf('Now in APIEventHandler::accessTokenCreated. Email is %s, IP is %s', $email, $ipAddress));
             try {

@@ -45,13 +45,15 @@ use League\Fractal\Resource\Item;
 
 /**
  * Class AccountController.
- *
  */
 class AccountController extends Controller
 {
     use AccountFilter, TransactionFilter;
-    /** @var AccountRepositoryInterface The account repository */
-    private $repository;
+
+    public const RESOURCE_KEY = 'accounts';
+
+    private AccountRepositoryInterface $repository;
+
 
     /**
      * AccountController constructor.
@@ -100,7 +102,7 @@ class AccountController extends Controller
         $resource = new FractalCollection($attachments, $transformer, 'attachments');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -150,10 +152,10 @@ class AccountController extends Controller
         $transformer = app(AccountTransformer::class);
         $transformer->setParameters($this->parameters);
 
-        $resource = new FractalCollection($accounts, $transformer, 'accounts');
+        $resource = new FractalCollection($accounts, $transformer, self::RESOURCE_KEY);
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
 
@@ -164,7 +166,6 @@ class AccountController extends Controller
      *
      * @return JsonResponse
      * @codeCoverageIgnore
-     *
      */
     public function piggyBanks(Account $account): JsonResponse
     {
@@ -190,7 +191,7 @@ class AccountController extends Controller
         $resource = new FractalCollection($piggyBanks, $transformer, 'piggy_banks');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
 
     }
 
@@ -208,9 +209,9 @@ class AccountController extends Controller
         /** @var AccountTransformer $transformer */
         $transformer = app(AccountTransformer::class);
         $transformer->setParameters($this->parameters);
-        $resource = new Item($account, $transformer, 'accounts');
+        $resource = new Item($account, $transformer, self::RESOURCE_KEY);
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -230,9 +231,9 @@ class AccountController extends Controller
         $transformer = app(AccountTransformer::class);
         $transformer->setParameters($this->parameters);
 
-        $resource = new Item($account, $transformer, 'accounts');
+        $resource = new Item($account, $transformer, self::RESOURCE_KEY);
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -244,7 +245,6 @@ class AccountController extends Controller
      * @param Account $account
      *
      * @return JsonResponse
-     *
      */
     public function transactions(Request $request, Account $account): JsonResponse
     {
@@ -283,7 +283,7 @@ class AccountController extends Controller
         $resource = new FractalCollection($groups, $transformer, 'transactions');
         $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 
     /**
@@ -304,8 +304,8 @@ class AccountController extends Controller
         /** @var AccountTransformer $transformer */
         $transformer = app(AccountTransformer::class);
         $transformer->setParameters($this->parameters);
-        $resource = new Item($account, $transformer, 'accounts');
+        $resource = new Item($account, $transformer, self::RESOURCE_KEY);
 
-        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', 'application/vnd.api+json');
+        return response()->json($manager->createData($resource)->toArray())->header('Content-Type', self::CONTENT_TYPE);
     }
 }

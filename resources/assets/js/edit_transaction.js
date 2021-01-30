@@ -35,6 +35,8 @@ import ForeignAmountSelect from "./components/transactions/ForeignAmountSelect";
 import TransactionType from "./components/transactions/TransactionType";
 import AccountSelect from "./components/transactions/AccountSelect";
 import Budget from "./components/transactions/Budget";
+import CustomUri from "./components/transactions/CustomUri";
+import Bill from "./components/transactions/Bill";
 
 /**
  * First we will load Axios via bootstrap.js
@@ -42,14 +44,16 @@ import Budget from "./components/transactions/Budget";
  * vue, uiv and vuei18n are in app_vue.js
  */
 
- require('./bootstrap');
+require('./bootstrap');
 
 // components for create and edit transactions.
 Vue.component('budget', Budget);
+Vue.component('bill', Bill);
 Vue.component('custom-date', CustomDate);
 Vue.component('custom-string', CustomString);
 Vue.component('custom-attachments', CustomAttachments);
 Vue.component('custom-textarea', CustomTextarea);
+Vue.component('custom-uri', CustomUri);
 Vue.component('standard-date', StandardDate);
 Vue.component('group-description', GroupDescription);
 Vue.component('transaction-description', TransactionDescription);
@@ -68,9 +72,9 @@ const i18n = require('./i18n');
 
 let props = {};
 new Vue({
-            i18n,
-            el: "#edit_transaction",
-            render: (createElement) => {
-                return createElement(EditTransaction, { props: props })
-            },
-        });
+    i18n,
+    el: "#edit_transaction",
+    render: (createElement) => {
+        return createElement(EditTransaction, {props: props})
+    },
+});

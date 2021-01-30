@@ -38,23 +38,10 @@ use Log;
 class PiggyBankEventFactory
 {
     /**
-     * Constructor.
-     *
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
-
-    /**
      * @param TransactionJournal $journal
      * @param PiggyBank|null     $piggyBank
      *
      * @return PiggyBankEvent|null
-     *
      */
     public function create(TransactionJournal $journal, ?PiggyBank $piggyBank): ?PiggyBankEvent
     {

@@ -27,7 +27,6 @@ use Exception;
 use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Models\Note;
 use FireflyIII\Models\Recurrence;
-use FireflyIII\Models\TransactionJournalLink;
 use FireflyIII\Services\Internal\Support\RecurringTransactionTrait;
 use FireflyIII\Services\Internal\Support\TransactionTypeTrait;
 use FireflyIII\User;
@@ -42,8 +41,7 @@ class RecurrenceUpdateService
 {
     use TransactionTypeTrait, RecurringTransactionTrait;
 
-    /** @var User */
-    private $user;
+    private User $user;
 
     /**
      * Updates a recurrence.
@@ -89,7 +87,6 @@ class RecurrenceUpdateService
         $recurrence->save();
 
         // update all meta data:
-        //$this->updateMetaData($recurrence, $data);
 
         if (isset($data['recurrence']['notes']) && null !== $data['recurrence']['notes']) {
             $this->setNoteText($recurrence, $data['recurrence']['notes']);
@@ -101,7 +98,7 @@ class RecurrenceUpdateService
             $this->createRepetitions($recurrence, $data['repetitions'] ?? []);
         }
 
-        // update all transactions (and associated meta-data);
+        // update all transactions (and associated meta-data)
         if (null !== $data['transactions']) {
             $this->deleteTransactions($recurrence);
             $this->createTransactions($recurrence, $data['transactions'] ?? []);

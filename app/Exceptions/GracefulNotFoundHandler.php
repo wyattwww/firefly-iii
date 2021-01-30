@@ -38,6 +38,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Log;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Class GracefulNotFoundHandler
@@ -50,10 +51,10 @@ class GracefulNotFoundHandler extends ExceptionHandler
      * @param Request   $request
      * @param Exception $exception
      *
-     * @throws Exception
      * @return mixed
+     * @throws Exception
      */
-    public function render($request, Exception $exception)
+    public function render($request, Throwable $exception)
     {
         $route = $request->route();
         if (null === $route) {
@@ -74,9 +75,10 @@ class GracefulNotFoundHandler extends ExceptionHandler
                 return $this->handleAccount($request, $exception);
             case 'transactions.show':
                 return $this->handleGroup($request, $exception);
-                break;
             case 'attachments.show':
             case 'attachments.edit':
+            case 'attachments.download':
+            case 'attachments.view':
                 // redirect to original attachment holder.
                 return $this->handleAttachment($request, $exception);
                 break;
@@ -117,31 +119,31 @@ class GracefulNotFoundHandler extends ExceptionHandler
                 $request->session()->reflash();
 
                 return redirect(route('categories.index'));
-                break;
             case 'rules.edit':
                 $request->session()->reflash();
 
                 return redirect(route('rules.index'));
-                break;
             case 'transactions.edit':
             case 'transactions.mass.edit':
             case 'transactions.mass.delete':
             case 'transactions.bulk.edit':
-                $request->session()->reflash();
-
-                return redirect(route('index'));
-                break;
+                if ('POST' === $request->method()) {
+                    $request->session()->reflash();
+                    return redirect(route('index'));
+                }
+                return parent::render($request, $exception);
         }
+
     }
 
     /**
      * @param Request   $request
-     * @param Exception $exception
+     * @param Throwable $exception
      *
-     * @throws Exception
      * @return Redirector|Response
+     * @throws Exception
      */
-    private function handleAccount(Request $request, Exception $exception)
+    private function handleAccount(Request $request, Throwable $exception)
     {
         Log::debug('404 page is probably a deleted account. Redirect to overview of account types.');
         /** @var User $user */
@@ -164,12 +166,12 @@ class GracefulNotFoundHandler extends ExceptionHandler
 
     /**
      * @param Request   $request
-     * @param Exception $exception
+     * @param Throwable $exception
      *
-     * @throws Exception
      * @return RedirectResponse|Redirector|Response
+     * @throws Exception
      */
-    private function handleAttachment(Request $request, Exception $exception)
+    private function handleAttachment(Request $request, Throwable $exception)
     {
         Log::debug('404 page is probably a deleted attachment. Redirect to parent object.');
         /** @var User $user */
@@ -208,13 +210,13 @@ class GracefulNotFoundHandler extends ExceptionHandler
     }
 
     /**
-     * @param Request   $request
+     * @param Throwable $request
      * @param Exception $exception
      *
-     * @throws Exception
      * @return RedirectResponse|\Illuminate\Http\Response|Redirector|Response
+     * @throws Exception
      */
-    private function handleGroup(Request $request, Exception $exception)
+    private function handleGroup(Request $request, Throwable $exception)
     {
         Log::debug('404 page is probably a deleted group. Redirect to overview of group types.');
         /** @var User $user */

@@ -29,27 +29,13 @@ use FireflyIII\Models\Note;
 use FireflyIII\Models\Transaction;
 use FireflyIII\Models\TransactionJournal;
 use FireflyIII\User;
-use Log;
 
 /**
  * Class AttachmentFactory
  */
 class AttachmentFactory
 {
-    /** @var User */
-    private $user;
-
-    /**
-     * Constructor.
-     *
-     * @codeCoverageIgnore
-     */
-    public function __construct()
-    {
-        if ('testing' === config('app.env')) {
-            Log::warning(sprintf('%s should not be instantiated in the TEST environment!', get_class($this)));
-        }
-    }
+    private User $user;
 
     /**
      * @param array $data

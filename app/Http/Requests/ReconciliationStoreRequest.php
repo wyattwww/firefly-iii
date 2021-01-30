@@ -24,23 +24,17 @@ declare(strict_types=1);
 namespace FireflyIII\Http\Requests;
 
 use FireflyIII\Rules\ValidJournals;
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
 use Log;
 
 /**
  * Class ReconciliationStoreRequest
  */
-class ReconciliationStoreRequest extends Request
+class ReconciliationStoreRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ConvertsDataTypes, ChecksLogin;
 
     /**
      * Returns the data required by the controller.

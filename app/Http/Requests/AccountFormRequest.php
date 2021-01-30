@@ -25,22 +25,17 @@ namespace FireflyIII\Http\Requests;
 use FireflyIII\Models\Account;
 use FireflyIII\Models\Location;
 use FireflyIII\Rules\UniqueIban;
+use FireflyIII\Support\Request\AppendsLocationData;
+use FireflyIII\Support\Request\ChecksLogin;
+use FireflyIII\Support\Request\ConvertsDataTypes;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class AccountFormRequest.
  */
-class AccountFormRequest extends Request
+class AccountFormRequest extends FormRequest
 {
-    /**
-     * Verify the request.
-     *
-     * @return bool
-     */
-    public function authorize(): bool
-    {
-        // Only allow logged in users
-        return auth()->check();
-    }
+    use ConvertsDataTypes, AppendsLocationData, ChecksLogin;
 
     /**
      * Get all data.

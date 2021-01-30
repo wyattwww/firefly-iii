@@ -79,7 +79,6 @@ class ShowController extends Controller
      */
     public function show(Request $request, Category $category, Carbon $start = null, Carbon $end = null)
     {
-        //Log::debug('Now in show()');
         /** @var Carbon $start */
         $start = $start ?? session('start', Carbon::now()->startOfMonth());
         /** @var Carbon $end */
@@ -106,8 +105,6 @@ class ShowController extends Controller
         $groups = $collector->getPaginatedGroups();
         $groups->setPath($path);
 
-        //Log::debug('End of show()');
-
         return view('categories.show', compact('category','attachments', 'groups', 'periods', 'subTitle', 'subTitleIcon', 'start', 'end'));
     }
 
@@ -132,8 +129,8 @@ class ShowController extends Controller
         $subTitle = (string) trans('firefly.all_journals_for_category', ['name' => $category->name]);
         $first    = $this->repository->firstUseDate($category);
         /** @var Carbon $start */
-        $start = $first ?? new Carbon;
-        $end   = new Carbon;
+        $start = $first ?? today(config('app.timezone'));
+        $end   = today(config('app.timezone'));
         $path  = route('categories.show.all', [$category->id]);
         $attachments  = $this->repository->getAttachments($category);
 
