@@ -43,7 +43,7 @@ class NewCustomerRequest extends SpectreRequest
     {
         $data = [
             'data' => [
-                'identifier' => 'default_ff3_customer',
+                'identifier' => auth()->user()->email,
             ],
         ];
         $uri  = '/api/v4/customers/';

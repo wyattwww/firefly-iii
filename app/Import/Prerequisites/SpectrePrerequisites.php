@@ -198,7 +198,7 @@ class SpectrePrerequisites implements PrerequisitesInterface
      */
     private function hasSecret(): bool
     {
-        $secret = app('preferences')->getForUser($this->user, 'spectre_secret', null);
+        //$secret = app('preferences')->getForUser($this->user, 'spectre_secret', null);
         $secret = envNonEmpty('SPECTRE_SECRET', null);
         if (null === $secret) {
             return false;
